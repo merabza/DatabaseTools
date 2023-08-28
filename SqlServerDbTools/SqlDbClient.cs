@@ -571,7 +571,7 @@ ORDER BY TableName";
 
     public override async Task<bool> RecompileProcedures(string databaseName)
     {
-        Logger.LogInformation($"Recompiling Tables, views and triggers for database {databaseName}...");
+        Logger.LogInformation("Recompiling Tables, views and triggers for database {databaseName}...", databaseName);
 
         //if (_bp.CancelationPending())
         //  return;
@@ -656,7 +656,7 @@ ORDER BY TableName";
 
     public override async Task<bool> UpdateStatistics(string databaseName)
     {
-        Logger.LogInformation($"Update Statistics for database {databaseName}...");
+        Logger.LogInformation("Update Statistics for database {databaseName}...", databaseName);
 
         //_bp.Length = dbnames.Length;
         //_bp.Counted = 0;
