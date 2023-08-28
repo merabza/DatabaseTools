@@ -203,7 +203,8 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
         string parameterName)
     {
         var serverVersionParts = sqlServerProductVersion.Split('.');
-        int.TryParse(serverVersionParts[0], out var serverVersionNum);
+        if (!int.TryParse(serverVersionParts[0], out var serverVersionNum))
+            return null;
         if (serverVersionParts.Length <= 1)
             return null;
 
@@ -227,7 +228,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, null);
+            Logger.LogError(ex, "Error in method RegRead");
             throw;
         }
         finally
@@ -238,7 +239,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
         return null;
     }
 
-    private string? GetMasterDir(string? masterFileName)
+    private static string? GetMasterDir(string? masterFileName)
     {
         //პირველი 2 სიმბოლო ზედმეტია
         return masterFileName == null ? null : Path.GetDirectoryName(masterFileName[2..]);
@@ -287,7 +288,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, null);
+            Logger.LogError(ex, "Error in method GetServerProductVersion");
             throw;
         }
         finally
@@ -319,7 +320,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, null);
+            Logger.LogError(ex, "Error in method GetServerInstanceName");
             throw;
         }
         finally
@@ -332,11 +333,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
 
     public override async Task<List<DatabaseInfoModel>> GetDatabaseInfos()
     {
-        var dbm = GetDbManager();
-        if (dbm is null)
-            //Logger.LogError("Cannot create Database connection");
-            throw new Exception("Cannot create Database connection");
-
+        var dbm = GetDbManager() ?? throw new Exception("Cannot create Database connection");
         try
         {
             dbm.Open();
