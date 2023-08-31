@@ -77,7 +77,7 @@ RESTORE VERIFYONLY FROM DISK = N'{backupFilename}' WITH  FILE = @backupSetId, NO
 
         try
         {
-            var query = @"select count(*) from master.dbo.sysdatabases where name=@database";
+            const string query = "select count(*) from master.dbo.sysdatabases where name=@database";
             dbm.AddParameter("@database", databaseName);
             dbm.Open();
             return await dbm.ExecuteScalarAsync<int>(query) == 1;
@@ -405,8 +405,6 @@ WHERE name = 'backup compression default' AND maximum > 0";
         {
             dbm.Open();
             var clientNetAddress = dbm.ExecuteScalar<string>(queryString);
-            if (clientNetAddress is null)
-                return false;
             return clientNetAddress is "<local machine>" or "127.0.0.1";
         }
         catch (Exception ex)
