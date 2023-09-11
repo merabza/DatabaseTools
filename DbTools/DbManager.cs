@@ -24,7 +24,7 @@ public sealed class DbManager : IDisposable
         Connection.ConnectionString = connectionString;
         CommandTimeOut = commandTimeout;
         if (fireInfoMessageEventOnUserErrors)
-            _kit.InfoMessage += dbKit_InfoMessage;
+            _kit.InfoMessage += DbKit_InfoMessage;
     }
 
     private int CommandTimeOut { get; }
@@ -68,12 +68,12 @@ public sealed class DbManager : IDisposable
         bool fireInfoMessageEventOnUserErrors = false)
     {
         var dbConnection = kit.GetConnection(fireInfoMessageEventOnUserErrors);
-        if (dbConnection is null)
-            return null;
-        return new DbManager(kit, dbConnection, connectionString, commandTimeout, fireInfoMessageEventOnUserErrors);
+        return dbConnection is null
+            ? null
+            : new DbManager(kit, dbConnection, connectionString, commandTimeout, fireInfoMessageEventOnUserErrors);
     }
 
-    private void dbKit_InfoMessage(object sender, InfoMessageEventArgs e)
+    private void DbKit_InfoMessage(object sender, InfoMessageEventArgs e)
     {
         InfoMessage?.Invoke(sender, e);
     }
