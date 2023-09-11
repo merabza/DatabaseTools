@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Threading;
 using System.Threading.Tasks;
 using DbTools.Models;
 using Microsoft.Extensions.Logging;
 
 namespace DbTools;
 
-public /*open*/ class DbClient
+public /*open*/ abstract class DbClient
 {
     private readonly DbConnectionStringBuilder _conStrBuilder;
     private readonly DbKit _dbKit;
@@ -64,7 +65,8 @@ public /*open*/ class DbClient
         return success;
     }
 
-    public async Task<bool> ExecuteCommandAsync(string strCommand, bool bLogStart = false, bool bLogFinish = false)
+    public async Task<bool> ExecuteCommandAsync(string strCommand, CancellationToken cancellationToken,
+        bool bLogStart = false, bool bLogFinish = false)
     {
         var dbm = GetDbManager();
         if (dbm is null)
@@ -82,7 +84,7 @@ public /*open*/ class DbClient
         try
         {
             dbm.Open();
-            await dbm.ExecuteNonQueryAsync(strCommand);
+            await dbm.ExecuteNonQueryAsync(strCommand, cancellationToken);
             success = true;
         }
         catch (Exception ex)
@@ -102,7 +104,7 @@ public /*open*/ class DbClient
     }
 
 
-    protected async Task<T?> ExecuteScalarAsync<T>(string queryString)
+    protected async Task<T?> ExecuteScalarAsync<T>(string queryString, CancellationToken cancellationToken)
     {
         var dbm = GetDbManager();
         if (dbm is null)
@@ -114,7 +116,7 @@ public /*open*/ class DbClient
         try
         {
             dbm.Open();
-            return await dbm.ExecuteScalarAsync<T>(queryString);
+            return await dbm.ExecuteScalarAsync<T>(queryString, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -129,75 +131,35 @@ public /*open*/ class DbClient
     }
 
 
-    public virtual Task<bool> BackupDatabase(string databaseName, string backupFilename, string backupName,
-        EBackupType backupType, bool compression)
-    {
-        return Task.FromResult(false);
-    }
+    public abstract Task<bool> BackupDatabase(string databaseName, string backupFilename, string backupName,
+        EBackupType backupType, bool compression, CancellationToken cancellationToken);
 
-    public virtual Task<string?> HostPlatform()
-    {
-        return Task.FromResult<string?>(null);
-    }
+    public abstract Task<string?> HostPlatform(CancellationToken cancellationToken);
 
-    public virtual Task<bool> VerifyBackup(string databaseName, string backupFilename)
-    {
-        return Task.FromResult(false);
-    }
+    public abstract Task<bool> VerifyBackup(string databaseName, string backupFilename,
+        CancellationToken cancellationToken);
 
-    public virtual Task<bool> RestoreDatabase(string databaseName, string backupFileFullName,
-        List<RestoreFileModel>? files, string dataFolderName, string dataLogFolderName, string dirSeparator)
-    {
-        return Task.FromResult(false);
-    }
+    public abstract Task<bool> RestoreDatabase(string databaseName, string backupFileFullName,
+        List<RestoreFileModel>? files, string dataFolderName, string dataLogFolderName, string dirSeparator,
+        CancellationToken cancellationToken);
 
-    public virtual Task<bool> CheckDatabase(string databaseName)
-    {
-        return Task.FromResult(false);
-    }
+    public abstract Task<bool> CheckDatabase(string databaseName, CancellationToken cancellationToken);
 
-    public virtual List<RestoreFileModel> GetRestoreFiles(string backupFileFullName)
-    {
-        return new List<RestoreFileModel>();
-    }
+    public abstract List<RestoreFileModel> GetRestoreFiles(string backupFileFullName);
 
-    public virtual Task<bool> IsServerAllowsCompression()
-    {
-        return Task.FromResult(false);
-    }
+    public abstract Task<bool> IsServerAllowsCompression(CancellationToken cancellationToken);
 
-    public virtual bool TestConnection(bool withDatabase = true)
-    {
-        return false;
-    }
+    public abstract bool TestConnection(bool withDatabase = true);
 
-    public virtual Task<DbServerInfo> GetDbServerInfo()
-    {
-        throw new NotImplementedException();
-    }
+    public abstract Task<DbServerInfo> GetDbServerInfo(CancellationToken cancellationToken);
 
-    public virtual Task<List<DatabaseInfoModel>> GetDatabaseInfos()
-    {
-        throw new NotImplementedException();
-    }
+    public abstract Task<List<DatabaseInfoModel>> GetDatabaseInfos(CancellationToken cancellationToken);
 
-    public virtual bool IsServerLocal()
-    {
-        return false;
-    }
+    public abstract bool IsServerLocal();
 
-    public virtual Task<bool> CheckRepairDatabase(string databaseName)
-    {
-        return Task.FromResult(false);
-    }
+    public abstract Task<bool> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken);
 
-    public virtual Task<bool> RecompileProcedures(string databaseName)
-    {
-        return Task.FromResult(false);
-    }
+    public abstract Task<bool> RecompileProcedures(string databaseName, CancellationToken cancellationToken);
 
-    public virtual Task<bool> UpdateStatistics(string databaseName)
-    {
-        return Task.FromResult(false);
-    }
+    public abstract Task<bool> UpdateStatistics(string databaseName, CancellationToken cancellationToken);
 }

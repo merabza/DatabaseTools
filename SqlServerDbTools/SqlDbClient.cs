@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DbTools;
 using DbTools.Models;
@@ -25,7 +26,7 @@ public sealed class SqlDbClient : DbClient
     }
 
     public override async Task<bool> BackupDatabase(string databaseName, string backupFilename, string backupName,
-        EBackupType backupType, bool compression)
+        EBackupType backupType, bool compression, CancellationToken cancellationToken)
     {
         var buTypeWord = "DATABASE";
         if (backupType == EBackupType.TrLog)
@@ -36,19 +37,21 @@ public sealed class SqlDbClient : DbClient
 
         return await ExecuteCommandAsync(@$"BACKUP {buTypeWord} [{databaseName}] 
 TO DISK=N'{backupFilename}' 
-WITH {buDifferentialWord}NOFORMAT, NOINIT, NAME = N'{backupName}', SKIP, REWIND, NOUNLOAD{(compression ? ", COMPRESSION" : "")}");
+WITH {buDifferentialWord}NOFORMAT, NOINIT, NAME = N'{backupName}', SKIP, REWIND, NOUNLOAD{(compression ? ", COMPRESSION" : "")}",
+            cancellationToken);
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
         //თუმცა თუ STATS მითითებული არ აქვს ავტომატურად აკეთებს STATS=10
         //STATS [ = percentage ] Displays a message each time another percentage completes, and is used to gauge progress. If percentage is omitted, SQL Server displays a message after each 10 percent is completed.
     }
 
-    public override async Task<string?> HostPlatform()
+    public override async Task<string?> HostPlatform(CancellationToken cancellationToken)
     {
         const string queryString = @"SELECT host_platform FROM sys.dm_os_host_info";
-        return await ExecuteScalarAsync<string>(queryString);
+        return await ExecuteScalarAsync<string>(queryString, cancellationToken);
     }
 
-    public override async Task<bool> VerifyBackup(string databaseName, string backupFilename)
+    public override async Task<bool> VerifyBackup(string databaseName, string backupFilename,
+        CancellationToken cancellationToken)
     {
         return await ExecuteCommandAsync(
             @$"DECLARE @backupSetId as int 
@@ -62,11 +65,11 @@ IF @backupSetId is null
  BEGIN 
   RAISERROR(N'Verify failed. Backup information for database ''{databaseName}'' not found.', 16, 1) 
  END 
-RESTORE VERIFYONLY FROM DISK = N'{backupFilename}' WITH  FILE = @backupSetId, NOUNLOAD, NOREWIND");
+RESTORE VERIFYONLY FROM DISK = N'{backupFilename}' WITH  FILE = @backupSetId, NOUNLOAD, NOREWIND", cancellationToken);
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
     }
 
-    public override async Task<bool> CheckDatabase(string databaseName)
+    public override async Task<bool> CheckDatabase(string databaseName, CancellationToken cancellationToken)
     {
         var dbm = GetDbManager();
         if (dbm is null)
@@ -80,7 +83,7 @@ RESTORE VERIFYONLY FROM DISK = N'{backupFilename}' WITH  FILE = @backupSetId, NO
             const string query = "select count(*) from master.dbo.sysdatabases where name=@database";
             dbm.AddParameter("@database", databaseName);
             dbm.Open();
-            return await dbm.ExecuteScalarAsync<int>(query) == 1;
+            return await dbm.ExecuteScalarAsync<int>(query, cancellationToken) == 1;
         }
         catch (Exception ex)
         {
@@ -130,7 +133,8 @@ RESTORE VERIFYONLY FROM DISK = N'{backupFilename}' WITH  FILE = @backupSetId, NO
 
 
     public override async Task<bool> RestoreDatabase(string databaseName, string backupFileFullName,
-        List<RestoreFileModel>? files, string dataFolderName, string dataLogFolderName, string dirSeparator)
+        List<RestoreFileModel>? files, string dataFolderName, string dataLogFolderName, string dirSeparator,
+        CancellationToken cancellationToken)
     {
         if (files == null)
         {
@@ -159,7 +163,7 @@ RESTORE VERIFYONLY FROM DISK = N'{backupFilename}' WITH  FILE = @backupSetId, NO
         return await ExecuteCommandAsync(@$"RESTORE DATABASE [{databaseName}] 
 FROM  DISK = N'{backupFileFullName}' WITH  FILE = 1,  
 MOVE N'{dataPart.LogicalName}' TO N'{dataPartFileFullName}',  
-MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE");
+MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE", cancellationToken);
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
     }
 
@@ -200,7 +204,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
     }
 
     private async Task<string?> RegRead(string sqlServerProductVersion, string instanceName, string? subRegFolder,
-        string parameterName)
+        string parameterName, CancellationToken cancellationToken)
     {
         var serverVersionParts = sqlServerProductVersion.Split('.');
         if (!int.TryParse(serverVersionParts[0], out var serverVersionNum))
@@ -222,7 +226,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
             var query = serverVersionNum > 10
                 ? $@"EXEC master.dbo.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'Software\Microsoft\MSSQLServer\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}', '{parameterName}'"
                 : $@"EXEC master.dbo.xp_regread N'HKEY_LOCAL_MACHINE', N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}', N'{parameterName}'";
-            var reader = await dbm.ExecuteReaderAsync(query);
+            var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
             if (reader.Read())
                 return reader.GetString(1);
         }
@@ -246,28 +250,32 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
     }
 
 
-    public override async Task<DbServerInfo> GetDbServerInfo()
+    public override async Task<DbServerInfo> GetDbServerInfo(CancellationToken cancellationToken)
     {
-        var serverProductVersion = await GetServerProductVersion();
-        var serverInstanceName = await GetServerInstanceName();
+        var serverProductVersion = await GetServerProductVersion(cancellationToken);
+        var serverInstanceName = await GetServerInstanceName(cancellationToken);
         if (serverProductVersion is null || serverInstanceName is null)
             throw new Exception("error when get server info 1");
-        var backupDirectory = await RegRead(serverProductVersion, serverInstanceName, null, "BackupDirectory");
+        var backupDirectory = await RegRead(serverProductVersion, serverInstanceName, null, "BackupDirectory",
+            cancellationToken);
         //თუ სპეციალურად არ არის განსაზღვრული, რომელი ფოლდერი უნდა გამოიყენოს სერვერმა ბაზებისათვის, მაშინ იყენებს მასტერის ადგილმდებარეობას
         var defaultDataDirectory =
-            await RegRead(serverProductVersion, serverInstanceName, null, "DefaultData") ??
-            GetMasterDir(await RegRead(serverProductVersion, serverInstanceName, "Parameters", "SqlArg0"));
+            await RegRead(serverProductVersion, serverInstanceName, null, "DefaultData", cancellationToken) ??
+            GetMasterDir(await RegRead(serverProductVersion, serverInstanceName, "Parameters", "SqlArg0",
+                cancellationToken));
         //თუ სპეციალურად არ არის განსაზღვრული, რომელი ფოლდერი უნდა გამოიყენოს სერვერმა ბაზების ლოგებისათვის, მაშინ იყენებს მასტერის ლოგების ადგილმდებარეობას
-        var defaultLogDirectory = await RegRead(serverProductVersion, serverInstanceName, null, "DefaultLog") ??
-                                  GetMasterDir(await RegRead(serverProductVersion, serverInstanceName,
-                                      "Parameters", "SqlArg1"));
+        var defaultLogDirectory =
+            await RegRead(serverProductVersion, serverInstanceName, null, "DefaultLog", cancellationToken) ??
+            GetMasterDir(await RegRead(serverProductVersion, serverInstanceName,
+                "Parameters", "SqlArg1", cancellationToken));
         //if (backupDirectory is null || defaultDataDirectory is null || defaultLogDirectory is null)
         //    throw new Exception("error when get server info 2");
         return new DbServerInfo(serverProductVersion, serverInstanceName, backupDirectory, defaultDataDirectory,
-            defaultLogDirectory, await IsServerAllowsCompression(), await ServerName());
+            defaultLogDirectory, await IsServerAllowsCompression(cancellationToken),
+            await ServerName(cancellationToken));
     }
 
-    private async Task<string?> GetServerProductVersion()
+    private async Task<string?> GetServerProductVersion(CancellationToken cancellationToken)
     {
         if (_memoServerProductVersion != null)
             return _memoServerProductVersion;
@@ -284,7 +292,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
             dbm.ClearParameters();
             dbm.Open();
             const string query = @"SELECT SERVERPROPERTY('productversion')";
-            _memoServerProductVersion = await dbm.ExecuteScalarAsync<string>(query);
+            _memoServerProductVersion = await dbm.ExecuteScalarAsync<string>(query, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -299,7 +307,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
         return _memoServerProductVersion;
     }
 
-    private async Task<string?> GetServerInstanceName()
+    private async Task<string?> GetServerInstanceName(CancellationToken cancellationToken)
     {
         if (_memoServerInstanceName != null)
             return _memoServerInstanceName;
@@ -316,7 +324,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
             dbm.ClearParameters();
             dbm.Open();
             const string query = @"SELECT SERVERPROPERTY('InstanceName')";
-            _memoServerInstanceName = await dbm.ExecuteScalarAsync<string>(query) ?? "MSSQLSERVER";
+            _memoServerInstanceName = await dbm.ExecuteScalarAsync<string>(query, cancellationToken) ?? "MSSQLSERVER";
         }
         catch (Exception ex)
         {
@@ -331,7 +339,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
         return _memoServerInstanceName;
     }
 
-    public override async Task<List<DatabaseInfoModel>> GetDatabaseInfos()
+    public override async Task<List<DatabaseInfoModel>> GetDatabaseInfos(CancellationToken cancellationToken)
     {
         var dbm = GetDbManager() ?? throw new Exception("Cannot create Database connection");
         try
@@ -343,7 +351,7 @@ MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
 FROM sys.databases
 WHERE name <> 'tempdb'";
             var dbNames = new List<DatabaseInfoModel>();
-            var reader = await dbm.ExecuteReaderAsync(query);
+            var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
             while (reader.Read())
                 dbNames.Add(new DatabaseInfoModel(reader.GetString(1),
                     (EDatabaseRecovery)reader.GetByte(2),
@@ -361,7 +369,7 @@ WHERE name <> 'tempdb'";
         }
     }
 
-    public override async Task<bool> IsServerAllowsCompression()
+    public override async Task<bool> IsServerAllowsCompression(CancellationToken cancellationToken)
     {
         var dbm = GetDbManager();
         if (dbm is null)
@@ -376,7 +384,7 @@ WHERE name <> 'tempdb'";
             const string query = @"SELECT count(value)
 FROM sys.configurations 
 WHERE name = 'backup compression default' AND maximum > 0";
-            return await dbm.ExecuteScalarAsync<int>(query) == 1;
+            return await dbm.ExecuteScalarAsync<int>(query, cancellationToken) == 1;
         }
         catch (Exception ex)
         {
@@ -419,7 +427,7 @@ WHERE name = 'backup compression default' AND maximum > 0";
     }
 
 
-    public override async Task<bool> CheckRepairDatabase(string databaseName)
+    public override async Task<bool> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken)
     {
         var dbm = GetDbManager();
         if (dbm is null)
@@ -432,7 +440,7 @@ WHERE name = 'backup compression default' AND maximum > 0";
         {
             var strCommand = $@"DBCC CHECKDB(N'{databaseName}') WITH NO_INFOMSGS";
             dbm.Open();
-            await dbm.ExecuteNonQueryAsync(strCommand);
+            await dbm.ExecuteNonQueryAsync(strCommand, cancellationToken);
             return true;
         }
         catch (Exception ex)
@@ -447,7 +455,7 @@ WHERE name = 'backup compression default' AND maximum > 0";
         return false;
     }
 
-    private async Task<List<Tuple<string, string>>> GetStoredProcedureNames()
+    private async Task<List<Tuple<string, string>>> GetStoredProcedureNames(CancellationToken cancellationToken)
 
     {
         var storedProcedures = new List<Tuple<string, string>>();
@@ -465,7 +473,7 @@ WHERE name = 'backup compression default' AND maximum > 0";
             dbm.Open();
             const string query = @"exec sp_stored_procedures";
 
-            var reader = await dbm.ExecuteReaderAsync(query);
+            var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
             while (reader.Read())
                 storedProcedures.Add(new Tuple<string, string>(reader.GetString(1), reader.GetString(2)));
         }
@@ -512,7 +520,7 @@ WHERE name = 'backup compression default' AND maximum > 0";
         return triggers;
     }
 
-    private async Task<List<string>> GetDatabaseTableNames()
+    private async Task<List<string>> GetDatabaseTableNames(CancellationToken cancellationToken)
     {
         var triggers = new List<string>();
 
@@ -537,7 +545,7 @@ WHERE (OBJECTPROPERTY(o.id, N'IsTable') = 1)
   AND USER_NAME(o.uid) <> 'sys'
 ORDER BY TableName";
 
-            var reader = await dbm.ExecuteReaderAsync(query);
+            var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
             while (reader.Read())
                 triggers.Add(reader.GetString(0));
         }
@@ -553,18 +561,18 @@ ORDER BY TableName";
         return triggers;
     }
 
-    private async Task RecompileDatabaseObject(string strObjectName)
+    private async Task RecompileDatabaseObject(string strObjectName, CancellationToken cancellationToken)
     {
-        await ExecuteCommandAsync($"EXEC sp_recompile [{strObjectName}]", true);
+        await ExecuteCommandAsync($"EXEC sp_recompile [{strObjectName}]", cancellationToken, true);
     }
 
-    private async Task UpdateStatisticsForOneTable(string strTableName)
+    private async Task UpdateStatisticsForOneTable(string strTableName, CancellationToken cancellationToken)
     {
-        await ExecuteCommandAsync($"UPDATE STATISTICS [{strTableName}] WITH FULLSCAN", true);
+        await ExecuteCommandAsync($"UPDATE STATISTICS [{strTableName}] WITH FULLSCAN", cancellationToken, true);
     }
 
 
-    public override async Task<bool> RecompileProcedures(string databaseName)
+    public override async Task<bool> RecompileProcedures(string databaseName, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Recompiling Tables, views and triggers for database {databaseName}...", databaseName);
 
@@ -572,12 +580,12 @@ ORDER BY TableName";
         //  return;
 
         //DbManager dbm = GetDbManager();
-        var serverName = await ServerName();
+        var serverName = await ServerName(cancellationToken);
 
         //-------------------------------------------------------------------
         //_bp.CurrentActivity = $"{serverName}_{dbname} Recompiling Stored Procedures...";
 
-        var storedProcedureNames = await GetStoredProcedureNames();
+        var storedProcedureNames = await GetStoredProcedureNames(cancellationToken);
         var procNames = storedProcedureNames.Where(w => w.Item1 != "sys" && !w.Item2.StartsWith("dt_"))
             .Select(s => s.Item2).ToArray();
         //_bp.SubLength = procNames.Length;
@@ -594,7 +602,7 @@ ORDER BY TableName";
             {
                 //if (_bp.CancelationPending())
                 //  return;
-                await RecompileDatabaseObject(strProcName); //.RemoveUnnecesseryLeadPart("dbo.")
+                await RecompileDatabaseObject(strProcName, cancellationToken); //.RemoveUnnecesseryLeadPart("dbo.")
             }
             catch (Exception ex)
             {
@@ -619,7 +627,7 @@ ORDER BY TableName";
             {
                 //if (_bp.CancelationPending())
                 //  return;
-                await RecompileDatabaseObject(strTriggerName); //.RemoveUnnecesseryLeadPart("dbo.")
+                await RecompileDatabaseObject(strTriggerName, cancellationToken); //.RemoveUnnecesseryLeadPart("dbo.")
             }
             catch (Exception ex)
             {
@@ -649,14 +657,14 @@ ORDER BY TableName";
     }
 
 
-    public override async Task<bool> UpdateStatistics(string databaseName)
+    public override async Task<bool> UpdateStatistics(string databaseName, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Update Statistics for database {databaseName}...", databaseName);
 
         //_bp.Length = dbnames.Length;
         //_bp.Counted = 0;
 
-        var serverName = await ServerName();
+        var serverName = await ServerName(cancellationToken);
 
         //if (_bp.CancelationPending())
         //    return;
@@ -678,14 +686,14 @@ ORDER BY TableName";
 
         try
         {
-            var tableNames = await GetDatabaseTableNames();
+            var tableNames = await GetDatabaseTableNames(cancellationToken);
             //_bp.SubLength = tableNames.Length;
             //_bp.SubCounted = 0;
             foreach (var strTableName in tableNames)
                 //if (_bp.CancelationPending())
                 //  return;
 
-                await UpdateStatisticsForOneTable(strTableName);
+                await UpdateStatisticsForOneTable(strTableName, cancellationToken);
             //_bp.SubCounted++;
             //_bp.SubLength = 0;
             //_bp.SubCounted = 0;
@@ -718,7 +726,7 @@ ORDER BY TableName";
     }
 
 
-    private async Task<string?> ServerName()
+    private async Task<string?> ServerName(CancellationToken cancellationToken)
     {
         const string queryString = @"SELECT @@servername";
 
@@ -732,7 +740,7 @@ ORDER BY TableName";
         try
         {
             dbm.Open();
-            return await dbm.ExecuteScalarAsync<string>(queryString);
+            return await dbm.ExecuteScalarAsync<string>(queryString, cancellationToken);
         }
         catch (Exception ex)
         {

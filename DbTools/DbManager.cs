@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DbTools;
@@ -132,11 +133,12 @@ public sealed class DbManager : IDisposable
         return defaultValue;
     }
 
-    public async Task<T?> ExecuteScalarAsync<T>(string commandText, T? defaultValue = default,
+    public async Task<T?> ExecuteScalarAsync<T>(string commandText, CancellationToken cancellationToken,
+        T? defaultValue = default,
         CommandType commandType = CommandType.Text)
     {
         PrepareCommand(commandText, commandType);
-        var retVal = await ExecuteScalarAsync();
+        var retVal = await ExecuteScalarAsync(cancellationToken);
         _dbCommand?.Parameters.Clear();
         if (retVal is not null && retVal != DBNull.Value)
             return (T?)retVal;
@@ -148,11 +150,11 @@ public sealed class DbManager : IDisposable
         return _dbCommand?.ExecuteScalar();
     }
 
-    private async Task<object?> ExecuteScalarAsync()
+    private async Task<object?> ExecuteScalarAsync(CancellationToken cancellationToken)
     {
         if (_dbCommand is null)
             return null;
-        return await _dbCommand.ExecuteScalarAsync();
+        return await _dbCommand.ExecuteScalarAsync(cancellationToken);
     }
 
     //მონაცემთა ბაზის ბრძანების შესრულება (ბრძანებისაგან არ ველოდებით მონაცემების დაბრუნებას, უბრალოდ უნდა შესრულდეს ბრძანება)
@@ -174,10 +176,11 @@ public sealed class DbManager : IDisposable
         _dbCommand.Parameters.Clear();
     }
 
-    public async Task<int> ExecuteNonQueryAsync(string commandText, CommandType commandType = CommandType.Text)
+    public async Task<int> ExecuteNonQueryAsync(string commandText, CancellationToken cancellationToken,
+        CommandType commandType = CommandType.Text)
     {
         PrepareCommand(commandText, commandType);
-        var retVal = await ExecuteNonQueryAsync();
+        var retVal = await ExecuteNonQueryAsync(cancellationToken);
         SavOutParameters();
         return retVal;
     }
@@ -188,11 +191,11 @@ public sealed class DbManager : IDisposable
         return _dbCommand?.ExecuteNonQuery() ?? 0;
     }
 
-    private async Task<int> ExecuteNonQueryAsync()
+    private async Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
     {
         if (_dbCommand is null)
             return 0;
-        return await _dbCommand.ExecuteNonQueryAsync();
+        return await _dbCommand.ExecuteNonQueryAsync(cancellationToken);
     }
 
 
@@ -206,19 +209,20 @@ public sealed class DbManager : IDisposable
     }
 
     //ჩანაწერების წამკითხველის გაშვება მითითებული ტიპის მითითებული ბრძანებისათვის
-    public async Task<IDataReader> ExecuteReaderAsync(string commandText, CommandType commandType = CommandType.Text)
+    public async Task<IDataReader> ExecuteReaderAsync(string commandText, CancellationToken cancellationToken,
+        CommandType commandType = CommandType.Text)
     {
         PrepareCommand(commandText, commandType);
-        _dataReader = await ExecuteReaderAsync();
+        _dataReader = await ExecuteReaderAsync(cancellationToken);
         _dbCommand?.Parameters.Clear();
         return _dataReader;
     }
 
-    private async Task<IDataReader> ExecuteReaderAsync()
+    private async Task<IDataReader> ExecuteReaderAsync(CancellationToken cancellationToken)
     {
         if (_dbCommand is null)
             throw new InvalidOperationException();
-        return await _dbCommand.ExecuteReaderAsync();
+        return await _dbCommand.ExecuteReaderAsync(cancellationToken);
     }
 
 
