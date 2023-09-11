@@ -40,8 +40,9 @@ public /*open*/ abstract class DbClient
         var success = false;
 
         if (bLogStart)
-            Logger.LogInformation("Start - " + strCommand + " For Database - " + dbm.Connection.DataSource + "." +
-                                  dbm.Connection.Database);
+            Logger.LogInformation(
+                "Start - {strCommand} For Database - {dbm.Connection.DataSource}.{dbm.Connection.Database}", strCommand,
+                dbm.Connection.DataSource, dbm.Connection.Database);
 
         try
         {
@@ -51,7 +52,7 @@ public /*open*/ abstract class DbClient
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, null);
+            Logger.LogError(ex, "Error in ExecuteCommandAsync");
         }
         finally
         {
@@ -59,8 +60,9 @@ public /*open*/ abstract class DbClient
         }
 
         if (bLogFinish)
-            Logger.LogInformation("Finish - " + strCommand + " For Database - " + dbm.Connection.DataSource + "." +
-                                  dbm.Connection.Database);
+            Logger.LogInformation(
+                "Finish - {strCommand} For Database - {dbm.Connection.DataSource}.{dbm.Connection.Database}",
+                strCommand, dbm.Connection.DataSource, dbm.Connection.Database);
 
         return success;
     }
@@ -78,8 +80,9 @@ public /*open*/ abstract class DbClient
         var success = false;
 
         if (bLogStart)
-            Logger.LogInformation("Start - " + strCommand + " For Database - " + dbm.Connection.DataSource + "." +
-                                  dbm.Connection.Database);
+            Logger.LogInformation(
+                "Start - {strCommand} For Database - {dbm.Connection.DataSource}.{dbm.Connection.Database}", strCommand,
+                dbm.Connection.DataSource, dbm.Connection.Database);
 
         try
         {
@@ -89,7 +92,7 @@ public /*open*/ abstract class DbClient
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, null);
+            Logger.LogError(ex, "Error in ExecuteCommandAsync");
         }
         finally
         {
@@ -97,8 +100,11 @@ public /*open*/ abstract class DbClient
         }
 
         if (bLogFinish)
-            Logger.LogInformation("Finish - " + strCommand + " For Database - " + dbm.Connection.DataSource + "." +
-                                  dbm.Connection.Database);
+            Logger.LogInformation(
+                "Finish - {strCommand} For Database - {dbm.Connection.DataSource}.{dbm.Connection.Database}",
+                strCommand,
+                dbm.Connection.DataSource, dbm.Connection.Database);
+
 
         return success;
     }
@@ -120,7 +126,7 @@ public /*open*/ abstract class DbClient
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, null);
+            Logger.LogError(ex, "Error in ExecuteScalarAsync");
         }
         finally
         {
