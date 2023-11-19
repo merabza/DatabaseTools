@@ -12,9 +12,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DbTools\DbTools.csproj" />
-      <ProjectReference Include="..\SqLiteDbTools\SqLiteDbTools.csproj" />
-      <ProjectReference Include="..\SqlServerDbTools\SqlServerDbTools.csproj" />
+        <ProjectReference Include="..\DbTools\DbTools.csproj" />
+        <ProjectReference Include="..\SqLiteDbTools\SqLiteDbTools.csproj" />
+        <ProjectReference Include="..\SqlServerDbTools\SqlServerDbTools.csproj" />
     </ItemGroup>
 
 </Project>
