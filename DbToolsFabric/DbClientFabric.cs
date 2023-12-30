@@ -3,6 +3,7 @@ using DbTools;
 using DbTools.Models;
 using Microsoft.Extensions.Logging;
 using SqlServerDbTools;
+using SystemToolsShared;
 
 namespace DbToolsFabric;
 
@@ -10,7 +11,7 @@ public static class DbClientFabric
 {
     public static DbClient? GetDbClient(ILogger logger, bool useConsole, EDataProvider dataProvider,
         string serverAddress, DbAuthSettingsBase dbAuthSettingsBase, string? applicationName,
-        string? databaseName = null)
+        string? databaseName = null, IMessagesDataManager? messagesDataManager = null)
     {
         switch (dataProvider)
         {
@@ -30,7 +31,7 @@ public static class DbClientFabric
                     conStrBuilder.InitialCatalog = databaseName;
 
                 var dbKit = ManagerFactory.GetKit(EDataProvider.Sql);
-                return new SqlDbClient(logger, conStrBuilder, dbKit, useConsole);
+                return new SqlDbClient(logger, conStrBuilder, dbKit, useConsole, messagesDataManager);
             case EDataProvider.None:
             case EDataProvider.SqLite:
             default:

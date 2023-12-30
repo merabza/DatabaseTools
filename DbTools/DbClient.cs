@@ -4,7 +4,11 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using DbTools.Models;
+using LanguageExt;
 using Microsoft.Extensions.Logging;
+using OneOf;
+using SystemToolsShared;
+// ReSharper disable ConvertToPrimaryConstructor
 
 namespace DbTools;
 
@@ -28,16 +32,20 @@ public /*open*/ abstract class DbClient
         return DbManager.Create(_dbKit, _conStrBuilder.ConnectionString);
     }
 
-    public bool ExecuteCommand(string strCommand, bool bLogStart = false, bool bLogFinish = false)
+    public Option<Err[]> ExecuteCommand(string strCommand, bool bLogStart = false, bool bLogFinish = false)
     {
         var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
-            return false;
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
+                }
+            };
         }
-
-        var success = false;
 
         if (bLogStart)
             Logger.LogInformation(
@@ -48,11 +56,18 @@ public /*open*/ abstract class DbClient
         {
             dbm.Open();
             dbm.ExecuteNonQuery(strCommand);
-            success = true;
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error in ExecuteCommandAsync");
+            Logger.LogError(ex, "Error in ExecuteCommand");
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "ErrorInExecuteCommand",
+                    ErrorMessage = $"Error in ExecuteCommand {ex.Message}"
+                }
+            };
         }
         finally
         {
@@ -64,20 +79,24 @@ public /*open*/ abstract class DbClient
                 "Finish - {strCommand} For Database - {dbm.Connection.DataSource}.{dbm.Connection.Database}",
                 strCommand, dbm.Connection.DataSource, dbm.Connection.Database);
 
-        return success;
+        return null;
     }
 
-    public async Task<bool> ExecuteCommandAsync(string strCommand, CancellationToken cancellationToken,
+    public async Task<Option<Err[]>> ExecuteCommandAsync(string strCommand, CancellationToken cancellationToken,
         bool bLogStart = false, bool bLogFinish = false)
     {
         var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
-            return false;
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
+                }
+            };
         }
-
-        var success = false;
 
         if (bLogStart)
             Logger.LogInformation(
@@ -88,11 +107,19 @@ public /*open*/ abstract class DbClient
         {
             dbm.Open();
             await dbm.ExecuteNonQueryAsync(strCommand, cancellationToken);
-            success = true;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error in ExecuteCommandAsync");
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "ErrorInExecuteCommandAsync",
+                    ErrorMessage = $"Error in ExecuteCommandAsync {ex.Message}"
+                }
+            };
+
         }
         finally
         {
@@ -105,67 +132,87 @@ public /*open*/ abstract class DbClient
                 strCommand,
                 dbm.Connection.DataSource, dbm.Connection.Database);
 
-
-        return success;
+        return null;
     }
 
 
-    protected async Task<T?> ExecuteScalarAsync<T>(string queryString, CancellationToken cancellationToken)
+    protected async Task<OneOf<T, Err[]>> ExecuteScalarAsync<T>(string queryString, CancellationToken cancellationToken)
     {
         var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
-            return default;
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
+                }
+            };
         }
 
         try
         {
             dbm.Open();
-            return await dbm.ExecuteScalarAsync<T>(queryString, cancellationToken);
+            var executeScalarAsyncResult = await dbm.ExecuteScalarAsync<T>(queryString, cancellationToken);
+            if ( executeScalarAsyncResult is null)
+                return new Err[]
+                {
+                    new()
+                    {
+                        ErrorCode = "ExecuteScalarAsyncResultIsNull", ErrorMessage = "ExecuteScalarAsync Result Is Null"
+                    }
+                };
+            return executeScalarAsyncResult;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error in ExecuteScalarAsync");
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "ErrorInExecuteScalarAsync", ErrorMessage = "Error in ExecuteScalarAsync"
+                }
+            };
+
         }
         finally
         {
             dbm.Close();
         }
 
-        return default;
     }
 
-
-    public abstract Task<bool> BackupDatabase(string databaseName, string backupFilename, string backupName,
+    public abstract Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename, string backupName,
         EBackupType backupType, bool compression, CancellationToken cancellationToken);
 
-    public abstract Task<string?> HostPlatform(CancellationToken cancellationToken);
+    public abstract Task<OneOf<string,Err[]>> HostPlatform(CancellationToken cancellationToken);
 
-    public abstract Task<bool> VerifyBackup(string databaseName, string backupFilename,
+    public abstract Task<Option<Err[]>> VerifyBackup(string databaseName, string backupFilename,
         CancellationToken cancellationToken);
 
-    public abstract Task<bool> RestoreDatabase(string databaseName, string backupFileFullName,
+    public abstract Task<Option<Err[]>> RestoreDatabase(string databaseName, string backupFileFullName,
         List<RestoreFileModel>? files, string dataFolderName, string dataLogFolderName, string dirSeparator,
         CancellationToken cancellationToken);
 
-    public abstract Task<bool> CheckDatabase(string databaseName, CancellationToken cancellationToken);
+    public abstract Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken);
 
-    public abstract List<RestoreFileModel> GetRestoreFiles(string backupFileFullName);
+    public abstract OneOf<List<RestoreFileModel>, Err[]> GetRestoreFiles(string backupFileFullName);
 
-    public abstract Task<bool> IsServerAllowsCompression(CancellationToken cancellationToken);
+    public abstract Task<OneOf<bool, Err[]>> IsServerAllowsCompression(CancellationToken cancellationToken);
 
-    public abstract bool TestConnection(bool withDatabase = true);
+    public abstract Option<Err[]> TestConnection(bool withDatabase = true);
 
-    public abstract Task<DbServerInfo> GetDbServerInfo(CancellationToken cancellationToken);
+    public abstract Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken);
 
-    public abstract Task<List<DatabaseInfoModel>> GetDatabaseInfos(CancellationToken cancellationToken);
+    public abstract Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseInfos(CancellationToken cancellationToken);
 
-    public abstract bool IsServerLocal();
+    public abstract Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken);
 
-    public abstract Task<bool> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken);
+    public abstract Task<Option<Err[]>> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken);
 
-    public abstract Task<bool> RecompileProcedures(string databaseName, CancellationToken cancellationToken);
+    public abstract Task<Option<Err[]>> RecompileProcedures(string databaseName, CancellationToken cancellationToken);
 
-    public abstract Task<bool> UpdateStatistics(string databaseName, CancellationToken cancellationToken);
+    public abstract Task<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken);
 }
