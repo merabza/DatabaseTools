@@ -328,15 +328,15 @@ public sealed class SqlDbClient : DbClient
         if (regReadDefaultDataResult.IsT1)
             return regReadDefaultDataResult.AsT1;
         var defaultDataDirectory = regReadDefaultDataResult.AsT0;
-     
+
         if (defaultDataDirectory is not null)
             return defaultDataDirectory;
-        
+
         var regReadParametersResult0 = await RegRead(serverProductVersion, serverInstanceName, subRegFolder,
             subParameterName, cancellationToken);
         if (regReadParametersResult0.IsT1)
             return regReadParametersResult0.AsT1;
-        
+
         return GetMasterDir(regReadParametersResult0.AsT0);
     }
 
@@ -353,7 +353,8 @@ public sealed class SqlDbClient : DbClient
         if (serverInstanceNameResult.IsT1)
             return serverInstanceNameResult.AsT1;
         var serverInstanceName = serverInstanceNameResult.AsT0;
-        var regReadBackupDirectoryResult = await RegRead(serverProductVersion, serverInstanceName, null, "BackupDirectory", cancellationToken);
+        var regReadBackupDirectoryResult = await RegRead(serverProductVersion, serverInstanceName, null,
+            "BackupDirectory", cancellationToken);
         if (regReadBackupDirectoryResult.IsT1)
             return regReadBackupDirectoryResult.AsT1;
         var backupDirectory = regReadBackupDirectoryResult.AsT0;
@@ -374,18 +375,19 @@ public sealed class SqlDbClient : DbClient
         var isServerAllowsCompressionResult = await IsServerAllowsCompression(cancellationToken);
         if (isServerAllowsCompressionResult.IsT1)
             return isServerAllowsCompressionResult.AsT1;
-        var isServerAllowsCompression= isServerAllowsCompressionResult.AsT0;
+        var isServerAllowsCompression = isServerAllowsCompressionResult.AsT0;
 
         var serverNameResult = await ServerName(cancellationToken);
         if (serverNameResult.IsT1)
             return serverNameResult.AsT1;
-        var serverName= serverNameResult.AsT0;
+        var serverName = serverNameResult.AsT0;
 
         return new DbServerInfo(serverProductVersion, serverInstanceName, backupDirectory, defaultDataDirectory,
             defaultLogDirectory, isServerAllowsCompression, serverName);
     }
 
-    private async Task<OneOf<string, Err[]>> GetServerString(string query, CancellationToken cancellationToken, string? defString = null)
+    private async Task<OneOf<string, Err[]>> GetServerString(string query, CancellationToken cancellationToken,
+        string? defString = null)
     {
         var dbm = GetDbManager();
         if (dbm is null)
@@ -463,7 +465,8 @@ public sealed class SqlDbClient : DbClient
         return _memoServerInstanceName;
     }
 
-    public override async Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseInfos(CancellationToken cancellationToken)
+    public override async Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseInfos(
+        CancellationToken cancellationToken)
     {
         var dbm = GetDbManager();
         if (dbm is null)
@@ -515,7 +518,8 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-    private async Task<OneOf<bool, Err[]>> GetServerIntBool(string query, CancellationToken cancellationToken, string? databaseName = null)
+    private async Task<OneOf<bool, Err[]>> GetServerIntBool(string query, CancellationToken cancellationToken,
+        string? databaseName = null)
     {
         var dbm = GetDbManager();
         if (dbm is null)
@@ -532,7 +536,7 @@ public sealed class SqlDbClient : DbClient
 
         try
         {
-            if ( databaseName is not null)
+            if (databaseName is not null)
                 dbm.AddParameter("@database", databaseName);
             dbm.Open();
             return await dbm.ExecuteScalarAsync<int>(query, cancellationToken) == 1;
@@ -577,13 +581,15 @@ public sealed class SqlDbClient : DbClient
     }
 
 
-    public override async Task<Option<Err[]>> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken)
+    public override async Task<Option<Err[]>> CheckRepairDatabase(string databaseName,
+        CancellationToken cancellationToken)
     {
         var strCommand = $"DBCC CHECKDB(N'{databaseName}') WITH NO_INFOMSGS";
         return await ExecuteCommandAsync(strCommand, cancellationToken, true);
     }
 
-    private async Task<OneOf<List<Tuple<string, string>>, Err[]>> GetStoredProcedureNames(CancellationToken cancellationToken)
+    private async Task<OneOf<List<Tuple<string, string>>, Err[]>> GetStoredProcedureNames(
+        CancellationToken cancellationToken)
 
     {
 
@@ -631,7 +637,7 @@ public sealed class SqlDbClient : DbClient
 
     }
 
-    private async Task<OneOf<List<string>,Err[]>> GetTriggerNames(CancellationToken cancellationToken)
+    private async Task<OneOf<List<string>, Err[]>> GetTriggerNames(CancellationToken cancellationToken)
     {
         var triggers = new List<string>();
 
@@ -738,13 +744,15 @@ public sealed class SqlDbClient : DbClient
         return await ExecuteCommandAsync($"EXEC sp_recompile [{strObjectName}]", cancellationToken, true);
     }
 
-    private async Task<Option<Err[]>> UpdateStatisticsForOneTable(string strTableName, CancellationToken cancellationToken)
+    private async Task<Option<Err[]>> UpdateStatisticsForOneTable(string strTableName,
+        CancellationToken cancellationToken)
     {
         return await ExecuteCommandAsync($"UPDATE STATISTICS [{strTableName}] WITH FULLSCAN", cancellationToken, true);
     }
 
 
-    public override async Task<Option<Err[]>> RecompileProcedures(string databaseName, CancellationToken cancellationToken)
+    public override async Task<Option<Err[]>> RecompileProcedures(string databaseName,
+        CancellationToken cancellationToken)
     {
         Logger.LogInformation("Recompiling Tables, views and triggers for database {databaseName}...", databaseName);
 
@@ -795,8 +803,9 @@ public sealed class SqlDbClient : DbClient
         //-------------------------------------------------------------------
         //_bp.CurrentActivity = $"{serverName}_{dbname} Recompiling Triggers...";
 
-        await _messagesDataManager.SendMessage(null, $"{serverName}_{databaseName} Recompiling Triggers...",
-            cancellationToken);
+        if (_messagesDataManager is not null)
+            await _messagesDataManager.SendMessage(null, $"{serverName}_{databaseName} Recompiling Triggers...",
+                cancellationToken);
 
         var getTriggerNames = await GetTriggerNames(cancellationToken);
         if (getTriggerNames.IsT1)
@@ -819,7 +828,7 @@ public sealed class SqlDbClient : DbClient
                 StShared.WriteException(ex, $"{serverName}_{databaseName} Error in Recompile trigger", UseConsole,
                     Logger);
             }
-        }        //_bp.SubCounted++;
+        } //_bp.SubCounted++;
         //_bp.SubLength = 0;
         //_bp.SubCounted = 0;
 
@@ -876,7 +885,7 @@ public sealed class SqlDbClient : DbClient
         try
         {
             var getDatabaseTableNamesResult = await GetDatabaseTableNames(cancellationToken);
-            if ( getDatabaseTableNamesResult.IsT1)
+            if (getDatabaseTableNamesResult.IsT1)
                 return getDatabaseTableNamesResult.AsT1;
             var tableNames = getDatabaseTableNamesResult.AsT0;
             //_bp.SubLength = tableNames.Length;
@@ -888,7 +897,7 @@ public sealed class SqlDbClient : DbClient
                     return new[] { DbToolsErrors.CancellationRequested(nameof(UpdateStatistics)) };
 
                 await UpdateStatisticsForOneTable(strTableName, cancellationToken);
-            }            //_bp.SubCounted++;
+            } //_bp.SubCounted++;
             //_bp.SubLength = 0;
             //_bp.SubCounted = 0;
             //სამუშაო ფოლდერში შეიქმნას ფაილი, რომელიც იქნება იმის აღმნიშვნელი, რომ ეს პროცესი შესრულდა და წარმატებით დასრულდა.
