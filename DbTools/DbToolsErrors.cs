@@ -4,7 +4,6 @@ namespace DbTools;
 
 public static class DbToolsErrors
 {
-
     public static Err CancellationRequested(string methodName)
     {
         return new Err
@@ -13,6 +12,4 @@ public static class DbToolsErrors
             ErrorMessage = $"Cancellation Requested in {methodName}"
         };
     }
-
-
 }

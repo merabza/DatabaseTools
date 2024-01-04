@@ -8,6 +8,7 @@ using LanguageExt;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared;
+
 // ReSharper disable ConvertToPrimaryConstructor
 
 namespace DbTools;
@@ -119,7 +120,6 @@ public /*open*/ abstract class DbClient
                     ErrorMessage = $"Error in ExecuteCommandAsync {ex.Message}"
                 }
             };
-
         }
         finally
         {
@@ -155,7 +155,7 @@ public /*open*/ abstract class DbClient
         {
             dbm.Open();
             var executeScalarAsyncResult = await dbm.ExecuteScalarAsync<T>(queryString, cancellationToken);
-            if ( executeScalarAsyncResult is null)
+            if (executeScalarAsyncResult is null)
                 return new Err[]
                 {
                     new()
@@ -175,19 +175,17 @@ public /*open*/ abstract class DbClient
                     ErrorCode = "ErrorInExecuteScalarAsync", ErrorMessage = "Error in ExecuteScalarAsync"
                 }
             };
-
         }
         finally
         {
             dbm.Close();
         }
-
     }
 
     public abstract Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename, string backupName,
         EBackupType backupType, bool compression, CancellationToken cancellationToken);
 
-    public abstract Task<OneOf<string,Err[]>> HostPlatform(CancellationToken cancellationToken);
+    public abstract Task<OneOf<string, Err[]>> HostPlatform(CancellationToken cancellationToken);
 
     public abstract Task<Option<Err[]>> VerifyBackup(string databaseName, string backupFilename,
         CancellationToken cancellationToken);

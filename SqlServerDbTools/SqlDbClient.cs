@@ -11,6 +11,7 @@ using LanguageExt;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared;
+
 // ReSharper disable ConvertToPrimaryConstructor
 
 namespace SqlServerDbTools;
@@ -341,8 +342,6 @@ public sealed class SqlDbClient : DbClient
     }
 
 
-
-
     public override async Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken)
     {
         var serverProductVersionResult = await GetServerProductVersion(cancellationToken);
@@ -418,7 +417,6 @@ public sealed class SqlDbClient : DbClient
                 };
             _memoServerProductVersion = executeScalarAsyncResult;
             return _memoServerProductVersion;
-
         }
         catch (Exception ex)
         {
@@ -436,7 +434,6 @@ public sealed class SqlDbClient : DbClient
         {
             dbm.Close();
         }
-
     }
 
     private async Task<OneOf<string, Err[]>> GetServerProductVersion(CancellationToken cancellationToken)
@@ -592,8 +589,6 @@ public sealed class SqlDbClient : DbClient
         CancellationToken cancellationToken)
 
     {
-
-
         var dbm = GetDbManager();
         if (dbm is null)
         {
@@ -634,7 +629,6 @@ public sealed class SqlDbClient : DbClient
         {
             dbm.Close();
         }
-
     }
 
     private async Task<OneOf<List<string>, Err[]>> GetTriggerNames(CancellationToken cancellationToken)
@@ -684,7 +678,6 @@ public sealed class SqlDbClient : DbClient
 
     private async Task<OneOf<List<string>, Err[]>> GetDatabaseTableNames(CancellationToken cancellationToken)
     {
-
         var dbm = GetDbManager();
         if (dbm is null)
         {
@@ -736,7 +729,6 @@ public sealed class SqlDbClient : DbClient
         {
             dbm.Close();
         }
-
     }
 
     private async Task<Option<Err[]>> RecompileDatabaseObject(string strObjectName, CancellationToken cancellationToken)
@@ -775,7 +767,6 @@ public sealed class SqlDbClient : DbClient
         //_bp.SubCounted = 0;
         foreach (var strCurProcName in procNames)
         {
-
             if (cancellationToken.IsCancellationRequested)
                 return new[] { DbToolsErrors.CancellationRequested(nameof(RecompileProcedures)) };
 
@@ -784,7 +775,6 @@ public sealed class SqlDbClient : DbClient
             var strProcName = splitWords[0];
             try
             {
-
                 if (cancellationToken.IsCancellationRequested)
                     return new[] { DbToolsErrors.CancellationRequested(nameof(RecompileProcedures)) };
 
@@ -815,7 +805,6 @@ public sealed class SqlDbClient : DbClient
         //_bp.SubCounted = 0;
         foreach (var strTriggerName in triggerNames)
         {
-
             if (cancellationToken.IsCancellationRequested)
                 return new[] { DbToolsErrors.CancellationRequested(nameof(RecompileProcedures)) };
 
@@ -892,7 +881,6 @@ public sealed class SqlDbClient : DbClient
             //_bp.SubCounted = 0;
             foreach (var strTableName in tableNames)
             {
-
                 if (cancellationToken.IsCancellationRequested)
                     return new[] { DbToolsErrors.CancellationRequested(nameof(UpdateStatistics)) };
 
