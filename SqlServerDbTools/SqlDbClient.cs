@@ -239,7 +239,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            StShared.WriteException(ex, "Connection Failed", UseConsole, Logger);
+            //StShared.WriteException(ex, "Connection Failed", UseConsole, Logger);
             return new Err[]
             {
                 new()
