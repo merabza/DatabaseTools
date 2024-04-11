@@ -58,7 +58,6 @@ public sealed class DbManager : IDisposable
 
         Connection.Dispose();
 
-        GC.SuppressFinalize(this);
         GC.Collect();
     }
 

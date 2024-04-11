@@ -89,7 +89,7 @@ public sealed class SqlDbClient : DbClient
 
     public override OneOf<List<RestoreFileModel>, Err[]> GetRestoreFiles(string backupFileFullName)
     {
-        var dbm = GetDbManager();
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
@@ -106,7 +106,7 @@ public sealed class SqlDbClient : DbClient
         {
             var query = $"RESTORE FILELISTONLY FROM  DISK = N'{backupFileFullName}' WITH  NOUNLOAD,  FILE = 1";
             dbm.Open();
-            var reader = dbm.ExecuteReader(query);
+            using var reader = dbm.ExecuteReader(query);
             var fileNames = new List<RestoreFileModel>();
             while (reader.Read())
                 fileNames.Add(new RestoreFileModel((string)reader["LogicalName"],
@@ -190,7 +190,7 @@ public sealed class SqlDbClient : DbClient
 
     public override Option<Err[]> TestConnection(bool withDatabase = true)
     {
-        var dbm = GetDbManager();
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
@@ -272,7 +272,7 @@ public sealed class SqlDbClient : DbClient
                 }
             };
 
-        var dbm = GetDbManager();
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
@@ -388,7 +388,7 @@ public sealed class SqlDbClient : DbClient
     private async Task<OneOf<string, Err[]>> GetServerString(string query, CancellationToken cancellationToken,
         string? defString = null)
     {
-        var dbm = GetDbManager();
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
@@ -465,7 +465,7 @@ public sealed class SqlDbClient : DbClient
     public override async Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseInfos(
         CancellationToken cancellationToken)
     {
-        var dbm = GetDbManager();
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
@@ -518,7 +518,7 @@ public sealed class SqlDbClient : DbClient
     private async Task<OneOf<bool, Err[]>> GetServerIntBool(string query, CancellationToken cancellationToken,
         string? databaseName = null)
     {
-        var dbm = GetDbManager();
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
@@ -589,7 +589,7 @@ public sealed class SqlDbClient : DbClient
         CancellationToken cancellationToken)
 
     {
-        var dbm = GetDbManager();
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
@@ -635,7 +635,7 @@ public sealed class SqlDbClient : DbClient
     {
         var triggers = new List<string>();
 
-        var dbm = GetDbManager();
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
@@ -678,7 +678,7 @@ public sealed class SqlDbClient : DbClient
 
     private async Task<OneOf<List<string>, Err[]>> GetDatabaseTableNames(CancellationToken cancellationToken)
     {
-        var dbm = GetDbManager();
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");

@@ -35,7 +35,7 @@ public /*open*/ abstract class DbClient
 
     public Option<Err[]> ExecuteCommand(string strCommand, bool bLogStart = false, bool bLogFinish = false)
     {
-        var dbm = GetDbManager();
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
@@ -86,7 +86,7 @@ public /*open*/ abstract class DbClient
     public async Task<Option<Err[]>> ExecuteCommandAsync(string strCommand, CancellationToken cancellationToken,
         bool bLogStart = false, bool bLogFinish = false)
     {
-        var dbm = GetDbManager();
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
