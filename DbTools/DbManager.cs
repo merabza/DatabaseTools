@@ -58,7 +58,6 @@ public sealed class DbManager : IDisposable
 
         Connection.Dispose();
 
-        GC.SuppressFinalize(this);
         GC.Collect();
     }
 
@@ -67,9 +66,11 @@ public sealed class DbManager : IDisposable
     public static DbManager? Create(DbKit kit, string connectionString = "", int commandTimeout = 0,
         bool fireInfoMessageEventOnUserErrors = false)
     {
+        // ReSharper disable once using
         var dbConnection = kit.GetConnection(fireInfoMessageEventOnUserErrors);
         return dbConnection is null
             ? null
+            // ReSharper disable once DisposableConstructor
             : new DbManager(kit, dbConnection, connectionString, commandTimeout, fireInfoMessageEventOnUserErrors);
     }
 
@@ -95,10 +96,9 @@ public sealed class DbManager : IDisposable
             var p = _kit.GetParameter(param);
             if (p is null)
                 continue;
-            if ((param.Direction == ParameterDirection.InputOutput || param.Direction == ParameterDirection.Input) &&
+            if (param.Direction is ParameterDirection.InputOutput or ParameterDirection.Input &&
                 param.Value == null)
                 p.Value = DBNull.Value;
-            //}
             _dbCommand.Parameters.Add(p);
         }
     }
