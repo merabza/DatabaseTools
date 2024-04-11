@@ -14,6 +14,7 @@ public sealed class SqlKit : DbKit
 
     public override DbConnection GetConnection(bool fireInfoMessageEventOnUserErrors = false)
     {
+        // ReSharper disable once using
         var sqlConnection = new SqlConnection
             { FireInfoMessageEventOnUserErrors = fireInfoMessageEventOnUserErrors };
         if (fireInfoMessageEventOnUserErrors)
@@ -23,13 +24,15 @@ public sealed class SqlKit : DbKit
 
     private void sqlConnection_InfoMessage(object sender, SqlInfoMessageEventArgs e)
     {
-        if (IsInfoMessageUsed())
-            foreach (SqlError info in e.Errors)
-                RaiseInfoMessageEvent(info.Message, info.Class);
+        if (!IsInfoMessageUsed()) 
+            return;
+        foreach (SqlError info in e.Errors)
+            RaiseInfoMessageEvent(info.Message, info.Class);
     }
 
     public override DbCommand GetCommand()
     {
+        // ReSharper disable once DisposableConstructor
         return new SqlCommand();
     }
 
@@ -46,13 +49,13 @@ public sealed class SqlKit : DbKit
         return new SqlParameter { SqlDbType = SqlDbType.Structured, TypeName = "uniqueidentifier_list_tbltype" };
     }
 
-    public override DbCommandBuilder GetCommandBuilder()
-    {
-        return new SqlCommandBuilder();
-    }
+    //public override DbCommandBuilder GetCommandBuilder()
+    //{
+    //    return new SqlCommandBuilder();
+    //}
 
-    public override DbDataAdapter GetDataAdapter()
-    {
-        return new SqlDataAdapter();
-    }
+    //public override DbDataAdapter GetDataAdapter()
+    //{
+    //    return new SqlDataAdapter();
+    //}
 }

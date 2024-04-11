@@ -15,11 +15,13 @@ public sealed class SqLiteDbKit : DbKit
 
     public override DbConnection GetConnection(bool fireInfoMessageEventOnUserErrors = false)
     {
+        // ReSharper disable once DisposableConstructor
         return new SQLiteConnection();
     }
 
     public override DbCommand GetCommand()
     {
+        // ReSharper disable once DisposableConstructor
         return new SQLiteCommand();
     }
 
@@ -32,11 +34,13 @@ public sealed class SqLiteDbKit : DbKit
 
     public override DbCommandBuilder GetCommandBuilder()
     {
+        // ReSharper disable once DisposableConstructor
         return new SQLiteCommandBuilder();
     }
 
     public override DbDataAdapter GetDataAdapter()
     {
+        // ReSharper disable once DisposableConstructor
         return new SQLiteDataAdapter();
     }
 }
