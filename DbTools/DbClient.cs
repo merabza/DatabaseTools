@@ -13,16 +13,16 @@ using SystemToolsShared;
 
 namespace DbTools;
 
-public /*open*/ abstract class DbClient
+public /*open*/ abstract class DbClient : MessageLogger
 {
     private readonly DbConnectionStringBuilder _conStrBuilder;
     private readonly DbKit _dbKit;
-    protected readonly ILogger Logger;
     protected readonly bool UseConsole;
 
-    protected DbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole)
+    protected DbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,
+        IMessagesDataManager? messagesDataManager = null, string? userName = null) : base(logger, messagesDataManager,
+        userName)
     {
-        Logger = logger;
         _conStrBuilder = conStrBuilder;
         _dbKit = dbKit;
         UseConsole = useConsole;

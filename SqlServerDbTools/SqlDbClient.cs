@@ -12,22 +12,21 @@ using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared;
 
-// ReSharper disable ConvertToPrimaryConstructor
-
 namespace SqlServerDbTools;
 
 public sealed class SqlDbClient : DbClient
 {
-    private readonly IMessagesDataManager? _messagesDataManager;
     private string? _memoServerInstanceName;
 
 
     private string? _memoServerProductVersion;
 
+    // ReSharper disable once ConvertToPrimaryConstructor
     public SqlDbClient(ILogger logger, SqlConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,
-        IMessagesDataManager? messagesDataManager) : base(logger, conStrBuilder, dbKit, useConsole)
+        IMessagesDataManager? messagesDataManager = null, string? userName = null) : base(logger, conStrBuilder, dbKit,
+        useConsole, messagesDataManager, userName)
     {
-        _messagesDataManager = messagesDataManager;
+
     }
 
     public override async Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename,
@@ -746,15 +745,16 @@ public sealed class SqlDbClient : DbClient
     public override async Task<Option<Err[]>> RecompileProcedures(string databaseName,
         CancellationToken cancellationToken)
     {
-        Logger.LogInformation("Recompiling Tables, views and triggers for database {databaseName}...", databaseName);
+        await LogInfoAndSendMessage("Recompiling Tables, views and triggers for database {0}...",
+            databaseName, cancellationToken);
 
         if (cancellationToken.IsCancellationRequested)
             return new[] { DbToolsErrors.CancellationRequested(nameof(RecompileProcedures)) };
 
         var serverName = await ServerName(cancellationToken);
 
-        if (_messagesDataManager is not null)
-            await _messagesDataManager.SendMessage(null,
+        if (MessagesDataManager is not null)
+            await MessagesDataManager.SendMessage(null,
                 $"{serverName}_{databaseName} Recompiling Stored Procedures...", cancellationToken);
 
         var getStoredProcedureNamesResult = await GetStoredProcedureNames(cancellationToken);
@@ -763,14 +763,13 @@ public sealed class SqlDbClient : DbClient
         var storedProcedureNames = getStoredProcedureNamesResult.AsT0;
         var procNames = storedProcedureNames.Where(w => w.Item1 != "sys" && !w.Item2.StartsWith("dt_"))
             .Select(s => s.Item2).ToArray();
-        //_bp.SubLength = procNames.Length;
-        //_bp.SubCounted = 0;
+
         foreach (var strCurProcName in procNames)
         {
             if (cancellationToken.IsCancellationRequested)
                 return new[] { DbToolsErrors.CancellationRequested(nameof(RecompileProcedures)) };
 
-            char[] separators = { ';' };
+            char[] separators = [';'];
             var splitWords = strCurProcName.Split(separators);
             var strProcName = splitWords[0];
             try
@@ -778,31 +777,26 @@ public sealed class SqlDbClient : DbClient
                 if (cancellationToken.IsCancellationRequested)
                     return new[] { DbToolsErrors.CancellationRequested(nameof(RecompileProcedures)) };
 
-                await RecompileDatabaseObject(strProcName, cancellationToken);
+                var recompileDatabaseObjectResult = await RecompileDatabaseObject(strProcName, cancellationToken);
+                if (recompileDatabaseObjectResult.IsSome)
+                    return (Err[])recompileDatabaseObjectResult;
             }
             catch (Exception ex)
             {
                 StShared.WriteException(ex, $"{serverName}_{databaseName} Error in Recompile Stored Procedures",
                     UseConsole, Logger);
             }
-            //_bp.SubCounted++;
         }
 
-        //_bp.SubLength = 0;
-        //_bp.SubCounted = 0;
-        //-------------------------------------------------------------------
-        //_bp.CurrentActivity = $"{serverName}_{dbname} Recompiling Triggers...";
-
-        if (_messagesDataManager is not null)
-            await _messagesDataManager.SendMessage(null, $"{serverName}_{databaseName} Recompiling Triggers...",
+        if (MessagesDataManager is not null)
+            await MessagesDataManager.SendMessage(null, $"{serverName}_{databaseName} Recompiling Triggers...",
                 cancellationToken);
 
         var getTriggerNames = await GetTriggerNames(cancellationToken);
         if (getTriggerNames.IsT1)
             return getTriggerNames.AsT1;
         var triggerNames = getTriggerNames.AsT0;
-        //_bp.SubLength = triggerNames.Length;
-        //_bp.SubCounted = 0;
+
         foreach (var strTriggerName in triggerNames)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -810,32 +804,17 @@ public sealed class SqlDbClient : DbClient
 
             try
             {
-                await RecompileDatabaseObject(strTriggerName, cancellationToken);
+                var recompileDatabaseObjectResult = await RecompileDatabaseObject(strTriggerName, cancellationToken);
+                if (recompileDatabaseObjectResult.IsSome)
+                    return (Err[])recompileDatabaseObjectResult;
+
             }
             catch (Exception ex)
             {
                 StShared.WriteException(ex, $"{serverName}_{databaseName} Error in Recompile trigger", UseConsole,
                     Logger);
             }
-        } //_bp.SubCounted++;
-        //_bp.SubLength = 0;
-        //_bp.SubCounted = 0;
-
-
-        ////სამუშაო ფოლდერში შეიქმნას ფაილი, რომელიც იქნება იმის აღმნიშვნელი, რომ ეს პროცესი შესრულდა და წარმატებით დასრულდა.
-        ////ფაილის სახელი უნდა შედგებოდეს პროცედურის სახელისაგან თარიღისა და დროისაგან (როცა პროცესი დასრულდა)
-        ////ასევე სერვერის სახელი და ბაზის სახელი.
-        ////გაფართოება log
-        //procLogFile.CreateNow("Ok");
-        ////ასევე წაიშალოს ანალოგიური პროცესის მიერ წინათ შექმნილი ფაილები
-        //procLogFile.DeleteOldFiles();
-        //Loger.Instance.LogMessage("Ok");
-        //_bp.Counted++;
-
-        //  _bp.Length = 0;
-        //_bp.Counted = 0;
-
-
+        } 
         return null;
     }
 
@@ -844,32 +823,14 @@ public sealed class SqlDbClient : DbClient
     {
         Logger.LogInformation("Update Statistics for database {databaseName}...", databaseName);
 
-        if (_messagesDataManager is not null)
-            await _messagesDataManager.SendMessage(null, $"Update Statistics for database {databaseName}...",
+        if (MessagesDataManager is not null)
+            await MessagesDataManager.SendMessage(null, $"Update Statistics for database {databaseName}...",
                 cancellationToken);
-
-        //_bp.Length = dbnames.Length;
-        //_bp.Counted = 0;
 
         var serverName = await ServerName(cancellationToken);
 
         if (cancellationToken.IsCancellationRequested)
             return new[] { DbToolsErrors.CancellationRequested(nameof(UpdateStatistics)) };
-
-        //დადგინდეს მიმდინარე პერიოდისათვის შესრულდა თუ არა უკვე ეს პროცედურა. 
-        //ამისათვის, საჭიროა ვიპოვოთ წინა პროცედურის დასრულების აღსანიშნავი ფაილი
-        //და დავადგინოთ მისი შესრულების თარიღი.
-        //თუ ეს თარიღი მიმდინარე პერიოდშია, მაშინ პროცედურა აღარ უნდა შესრულდეს
-        //ProcLogFile procLogFile = new ProcLogFile($"UpdateStatistics_{serverName}_{dbname}_",
-        //  (EPeriodTypes)_dpspRow.mdpspPeriodType, _dpspRow.mdpspStartAt);
-        //if (procLogFile.HaveCurrentPeriodFile())
-        //{
-        //  Loger.Instance.LogMessage($"{serverName}_{dbname} Update Statistics already had executed in this period");
-        //  continue;
-        //}
-
-        //DbManager dbm = _procDb.GetDbManager(0, dbname);
-        //_bp.CurrentActivity = $"{serverName}_{dbname} Update Statistics...";
 
         try
         {
@@ -877,25 +838,15 @@ public sealed class SqlDbClient : DbClient
             if (getDatabaseTableNamesResult.IsT1)
                 return getDatabaseTableNamesResult.AsT1;
             var tableNames = getDatabaseTableNamesResult.AsT0;
-            //_bp.SubLength = tableNames.Length;
-            //_bp.SubCounted = 0;
             foreach (var strTableName in tableNames)
             {
                 if (cancellationToken.IsCancellationRequested)
                     return new[] { DbToolsErrors.CancellationRequested(nameof(UpdateStatistics)) };
 
-                await UpdateStatisticsForOneTable(strTableName, cancellationToken);
-            } //_bp.SubCounted++;
-            //_bp.SubLength = 0;
-            //_bp.SubCounted = 0;
-            //სამუშაო ფოლდერში შეიქმნას ფაილი, რომელიც იქნება იმის აღმნიშვნელი, რომ ეს პროცესი შესრულდა და წარმატებით დასრულდა.
-            //ფაილის სახელი უნდა შედგებოდეს პროცედურის სახელისაგან თარიღისა და დროისაგან (როცა პროცესი დასრულდა)
-            //ასევე სერვერის სახელი და ბაზის სახელი.
-            //გაფართოება log
-            //procLogFile.CreateNow("Ok");
-            ////ასევე წაიშალოს ანალოგიური პროცესის მიერ წინათ შექმნილი ფაილები
-            //procLogFile.DeleteOldFiles();
-            //Loger.Instance.LogMessage("Ok");
+                var updateStatisticsForOneTableResult = await UpdateStatisticsForOneTable(strTableName, cancellationToken);
+                if (updateStatisticsForOneTableResult.IsSome)
+                    return (Err[])updateStatisticsForOneTableResult;
+            }
         }
         catch (Exception ex)
         {
@@ -910,16 +861,6 @@ public sealed class SqlDbClient : DbClient
                 }
             };
         }
-        //finally
-        //{
-        //  dbm.Close();
-        //}
-        //_bp.Counted++;
-
-
-        //_bp.Length = 0;
-        //_bp.Counted = 0;
-
         return null;
     }
 
