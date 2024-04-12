@@ -1,5 +1,3 @@
 ﻿namespace DbTools.Models;
 
-public /*open*/ class DbAuthSettingsBase
-{
-}
+public /*open*/ class DbAuthSettingsBase;

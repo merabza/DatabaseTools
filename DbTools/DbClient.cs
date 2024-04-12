@@ -35,7 +35,8 @@ public /*open*/ abstract class DbClient : MessageLogger
 
     public Option<Err[]> ExecuteCommand(string strCommand, bool bLogStart = false, bool bLogFinish = false)
     {
-        var dbm = GetDbManager();
+        // ReSharper disable once using
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
@@ -86,7 +87,8 @@ public /*open*/ abstract class DbClient : MessageLogger
     public async Task<Option<Err[]>> ExecuteCommandAsync(string strCommand, CancellationToken cancellationToken,
         bool bLogStart = false, bool bLogFinish = false)
     {
-        var dbm = GetDbManager();
+        // ReSharper disable once using
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
@@ -138,7 +140,8 @@ public /*open*/ abstract class DbClient : MessageLogger
 
     protected async Task<OneOf<T, Err[]>> ExecuteScalarAsync<T>(string queryString, CancellationToken cancellationToken)
     {
-        var dbm = GetDbManager();
+        // ReSharper disable once using
+        using var dbm = GetDbManager();
         if (dbm is null)
         {
             Logger.LogError("Cannot create Database connection");
