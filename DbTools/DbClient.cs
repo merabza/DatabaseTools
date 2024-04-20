@@ -21,7 +21,7 @@ public /*open*/ abstract class DbClient : MessageLogger
 
     protected DbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,
         IMessagesDataManager? messagesDataManager = null, string? userName = null) : base(logger, messagesDataManager,
-        userName)
+        userName, useConsole)
     {
         _conStrBuilder = conStrBuilder;
         _dbKit = dbKit;
