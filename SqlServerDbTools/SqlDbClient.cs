@@ -152,14 +152,16 @@ public sealed class SqlDbClient : DbClient
                 CancellationToken.None);
 
         if (dbm.ConnectionString == "")
-            return await LogErrorAndSendMessageFromError(DbClientErrors.ConnectionServerDoesNotSpecified, CancellationToken.None);
+            return await LogErrorAndSendMessageFromError(DbClientErrors.ConnectionServerDoesNotSpecified,
+                CancellationToken.None);
 
         try
         {
             dbm.Open();
             dbm.Close();
-            if (dbm.Database == "" && withDatabase) 
-                return await LogErrorAndSendMessageFromError(DbClientErrors.DatabaseNameIsNotSpecified, CancellationToken.None);
+            if (dbm.Database == "" && withDatabase)
+                return await LogErrorAndSendMessageFromError(DbClientErrors.DatabaseNameIsNotSpecified,
+                    CancellationToken.None);
 
             _logger.LogInformation("Test Connection Succeeded");
             return null;
@@ -333,7 +335,11 @@ public sealed class SqlDbClient : DbClient
         const string query = "SELECT SERVERPROPERTY('productversion')";
         var getServerStringResult = await GetServerString(query, cancellationToken);
         if (getServerStringResult.IsT1)
-            return getServerStringResult.AsT1;
+            return Err.RecreateErrors(getServerStringResult.AsT1,
+                new Err
+                {
+                    ErrorCode = "ProductVersionIsNotDetected", ErrorMessage = "Product Version is not detected"
+                });
         _memoServerProductVersion = getServerStringResult.AsT0;
         return _memoServerProductVersion;
     }
@@ -343,10 +349,15 @@ public sealed class SqlDbClient : DbClient
         if (_memoServerInstanceName != null)
             return _memoServerInstanceName;
 
-        const string query = "SELECT SERVERPROPERTY('InstanceName')";
+        //const string query = "SELECT SERVERPROPERTY('InstanceName')";
+        const string query = "SELECT @@servicename";
         var getServerStringResult = await GetServerString(query, cancellationToken);
         if (getServerStringResult.IsT1)
-            return getServerStringResult.AsT1;
+            return Err.RecreateErrors(getServerStringResult.AsT1,
+                new Err
+                {
+                    ErrorCode = "ServerInstanceNameIsNotDetected", ErrorMessage = "Server Instance Name is not detected"
+                });
         _memoServerInstanceName = getServerStringResult.AsT0;
         return _memoServerInstanceName;
     }
@@ -430,7 +441,11 @@ public sealed class SqlDbClient : DbClient
         const string queryString = "SELECT CONNECTIONPROPERTY('client_net_address') AS client_net_address";
         var getServerStringResult = await GetServerString(queryString, cancellationToken);
         if (getServerStringResult.IsT1)
-            return getServerStringResult.AsT1;
+            return Err.RecreateErrors(getServerStringResult.AsT1,
+                new Err
+                {
+                    ErrorCode = "ClientNetAddressIsNotDetected", ErrorMessage = "Client Net Address is not detected"
+                });
         var clientNetAddress = getServerStringResult.AsT0;
         return clientNetAddress is "<local machine>" or "127.0.0.1";
     }
@@ -674,6 +689,13 @@ public sealed class SqlDbClient : DbClient
     private async Task<OneOf<string, Err[]>> ServerName(CancellationToken cancellationToken)
     {
         const string query = "SELECT @@servername";
-        return await GetServerString(query, cancellationToken);
+        var getServerStringResult = await GetServerString(query, cancellationToken);
+        if (getServerStringResult.IsT1)
+            return Err.RecreateErrors(getServerStringResult.AsT1,
+                new Err
+                {
+                    ErrorCode = "ServerNameIsNotDetected", ErrorMessage = "Server name is not detected"
+                });
+        return getServerStringResult.AsT0;
     }
 }
