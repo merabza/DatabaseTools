@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using DbTools.ErrorModels;
 using DbTools.Models;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
@@ -33,78 +34,20 @@ public /*open*/ abstract class DbClient : MessageLogger
         return DbManager.Create(_dbKit, _conStrBuilder.ConnectionString);
     }
 
-    public Option<Err[]> ExecuteCommand(string strCommand, bool bLogStart = false, bool bLogFinish = false)
+    //public async Task<Option<Err[]>> ExecuteCommand(string strCommand, CancellationToken cancellationToken,
+    //    bool bLogStart = false, bool bLogFinish = false)
+    public async Task<Option<Err[]>> ExecuteCommand(string strCommand, bool bLogStart, bool bLogFinish,
+        CancellationToken cancellationToken)
     {
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
 
         if (bLogStart)
-            Logger.LogInformation(
-                "Start - {strCommand} For Database - {dbm.Connection.DataSource}.{dbm.Connection.Database}", strCommand,
-                dbm.Connection.DataSource, dbm.Connection.Database);
-
-        try
-        {
-            dbm.Open();
-            dbm.ExecuteNonQuery(strCommand);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error in ExecuteCommand");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInExecuteCommand",
-                    ErrorMessage = $"Error in ExecuteCommand {ex.Message}"
-                }
-            };
-        }
-        finally
-        {
-            dbm.Close();
-        }
-
-        if (bLogFinish)
-            Logger.LogInformation(
-                "Finish - {strCommand} For Database - {dbm.Connection.DataSource}.{dbm.Connection.Database}",
-                strCommand, dbm.Connection.DataSource, dbm.Connection.Database);
-
-        return null;
-    }
-
-    public async Task<Option<Err[]>> ExecuteCommandAsync(string strCommand, CancellationToken cancellationToken,
-        bool bLogStart = false, bool bLogFinish = false)
-    {
-        // ReSharper disable once using
-        using var dbm = GetDbManager();
-        if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
-
-        if (bLogStart)
-            Logger.LogInformation(
-                "Start - {strCommand} For Database - {dbm.Connection.DataSource}.{dbm.Connection.Database}", strCommand,
-                dbm.Connection.DataSource, dbm.Connection.Database);
+            await LogInfoAndSendMessage("Start - {0} For Database - {1}.{2}", strCommand, dbm.Connection.DataSource,
+                dbm.Connection.Database, cancellationToken);
 
         try
         {
@@ -113,15 +56,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error in ExecuteCommandAsync");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInExecuteCommandAsync",
-                    ErrorMessage = $"Error in ExecuteCommandAsync {ex.Message}"
-                }
-            };
+            return await LogErrorAndSendMessageFromException(ex, nameof(ExecuteCommand), cancellationToken);
         }
         finally
         {
@@ -129,10 +64,8 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
 
         if (bLogFinish)
-            Logger.LogInformation(
-                "Finish - {strCommand} For Database - {dbm.Connection.DataSource}.{dbm.Connection.Database}",
-                strCommand,
-                dbm.Connection.DataSource, dbm.Connection.Database);
+            await LogInfoAndSendMessage("Finish - {0} For Database - {1}.{2}", strCommand, dbm.Connection.DataSource,
+                dbm.Connection.Database, cancellationToken);
 
         return null;
     }
@@ -143,16 +76,8 @@ public /*open*/ abstract class DbClient : MessageLogger
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
 
         try
         {
@@ -170,14 +95,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error in ExecuteScalarAsync");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInExecuteScalarAsync", ErrorMessage = "Error in ExecuteScalarAsync"
-                }
-            };
+            return await LogErrorAndSendMessageFromException(ex, nameof(ExecuteScalarAsync), cancellationToken);
         }
         finally
         {
@@ -199,11 +117,13 @@ public /*open*/ abstract class DbClient : MessageLogger
 
     public abstract Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken);
 
-    public abstract OneOf<List<RestoreFileModel>, Err[]> GetRestoreFiles(string backupFileFullName);
+    public abstract Task<OneOf<List<RestoreFileModel>, Err[]>> GetRestoreFiles(string backupFileFullName,
+        CancellationToken cancellationToken);
 
     public abstract Task<OneOf<bool, Err[]>> IsServerAllowsCompression(CancellationToken cancellationToken);
 
-    public abstract Option<Err[]> TestConnection(bool withDatabase = true);
+    //withDatabase იყო True
+    public abstract Task<Option<Err[]>> TestConnection(bool withDatabase, CancellationToken cancellationToken);
 
     public abstract Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken);
 

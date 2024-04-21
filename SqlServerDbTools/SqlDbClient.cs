@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DbTools;
+using DbTools.ErrorModels;
 using DbTools.Models;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ namespace SqlServerDbTools;
 
 public sealed class SqlDbClient : DbClient
 {
+    private readonly ILogger _logger;
     private string? _memoServerInstanceName;
     private string? _memoServerProductVersion;
 
@@ -24,7 +26,7 @@ public sealed class SqlDbClient : DbClient
         IMessagesDataManager? messagesDataManager = null, string? userName = null) : base(logger, conStrBuilder, dbKit,
         useConsole, messagesDataManager, userName)
     {
-
+        _logger = logger;
     }
 
     public override async Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename,
@@ -38,12 +40,11 @@ public sealed class SqlDbClient : DbClient
         if (backupType == EBackupType.Diff)
             buDifferentialWord = "DIFFERENTIAL, ";
 
-        return await ExecuteCommandAsync($"""
-                                          BACKUP {buTypeWord} [{databaseName}]
-                                          TO DISK=N'{backupFilename}'
-                                          WITH {buDifferentialWord}NOFORMAT, NOINIT, NAME = N'{backupName}', SKIP, REWIND, NOUNLOAD{(compression ? ", COMPRESSION" : "")}
-                                          """,
-            cancellationToken);
+        return await ExecuteCommand($"""
+                                     BACKUP {buTypeWord} [{databaseName}]
+                                     TO DISK=N'{backupFilename}'
+                                     WITH {buDifferentialWord}NOFORMAT, NOINIT, NAME = N'{backupName}', SKIP, REWIND, NOUNLOAD{(compression ? ", COMPRESSION" : "")}
+                                     """, false, false, cancellationToken);
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
         //თუმცა თუ STATS მითითებული არ აქვს ავტომატურად აკეთებს STATS=10
         //STATS [ = percentage ] Displays a message each time another percentage completes, and is used to gauge progress. If percentage is omitted, SQL Server displays a message after each 10 percent is completed.
@@ -58,7 +59,7 @@ public sealed class SqlDbClient : DbClient
     public override async Task<Option<Err[]>> VerifyBackup(string databaseName, string backupFilename,
         CancellationToken cancellationToken)
     {
-        return await ExecuteCommandAsync(
+        return await ExecuteCommand(
             $"""
              DECLARE @backupSetId as int
              SELECT @backupSetId = position
@@ -72,7 +73,7 @@ public sealed class SqlDbClient : DbClient
                RAISERROR(N'Verify failed. Backup information for database ''{databaseName}'' not found.', 16, 1)
               END
              RESTORE VERIFYONLY FROM DISK = N'{backupFilename}' WITH  FILE = @backupSetId, NOUNLOAD, NOREWIND
-             """, cancellationToken);
+             """, false, false, cancellationToken);
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
     }
 
@@ -83,28 +84,21 @@ public sealed class SqlDbClient : DbClient
         return await GetServerIntBool(query, cancellationToken, databaseName);
     }
 
-    public override OneOf<List<RestoreFileModel>, Err[]> GetRestoreFiles(string backupFileFullName)
+    public override async Task<OneOf<List<RestoreFileModel>, Err[]>> GetRestoreFiles(string backupFileFullName,
+        CancellationToken cancellationToken)
     {
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
 
         try
         {
             var query = $"RESTORE FILELISTONLY FROM  DISK = N'{backupFileFullName}' WITH  NOUNLOAD,  FILE = 1";
             dbm.Open();
             // ReSharper disable once using
-            using var reader = dbm.ExecuteReader(query);
+            using var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
             var fileNames = new List<RestoreFileModel>();
             while (reader.Read())
                 fileNames.Add(new RestoreFileModel((string)reader["LogicalName"],
@@ -114,15 +108,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            StShared.WriteException(ex, UseConsole, Logger);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInGetRestoreFiles",
-                    ErrorMessage = $"Error in GetRestoreFiles {ex.Message}"
-                }
-            };
+            return await LogErrorAndSendMessageFromException(ex, nameof(GetRestoreFiles), cancellationToken);
         }
         finally
         {
@@ -135,116 +121,52 @@ public sealed class SqlDbClient : DbClient
         CancellationToken cancellationToken)
     {
         if (files == null)
-        {
-            Logger.LogError("No information about restore file logical parts");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "NoRestoreFileNames", ErrorMessage = "No information about restore file logical parts"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.NoRestoreFileNames, cancellationToken);
 
         var dataPart = files.SingleOrDefault(s => s.Type == "D");
         if (dataPart == null)
-        {
-            Logger.LogError("No information about restore file Data Part");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "NoDataPart", ErrorMessage = "No information about restore file Data Part"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.NoDataPart, cancellationToken);
 
         var logPart = files.SingleOrDefault(s => s.Type == "L");
         if (logPart == null)
-        {
-            Logger.LogError("No information about restore file Log Part");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "NoLogPart", ErrorMessage = "No information about restore file Log Part"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.NoLogPart, cancellationToken);
 
         var dataPartFileFullName = $"{dataFolderName.AddNeedLastPart(dirSeparator)}{databaseName}.mdf";
         var dataLogPartFileFullName = $"{dataLogFolderName.AddNeedLastPart(dirSeparator)}{databaseName}_log.ldf";
 
-
-        return await ExecuteCommandAsync($"""
-                                          RESTORE DATABASE [{databaseName}]
-                                          FROM  DISK = N'{backupFileFullName}' WITH  FILE = 1,
-                                          MOVE N'{dataPart.LogicalName}' TO N'{dataPartFileFullName}',
-                                          MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
-                                          """, cancellationToken);
+        return await ExecuteCommand($"""
+                                     RESTORE DATABASE [{databaseName}]
+                                     FROM  DISK = N'{backupFileFullName}' WITH  FILE = 1,
+                                     MOVE N'{dataPart.LogicalName}' TO N'{dataPartFileFullName}',
+                                     MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
+                                     """, false, false, cancellationToken);
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
     }
 
-    public override Option<Err[]> TestConnection(bool withDatabase = true)
+    public override async Task<Option<Err[]>> TestConnection(bool withDatabase, CancellationToken cancellationToken)
     {
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
 
         if (dbm.ConnectionString == "")
-        {
-            Logger.LogError("Connection Server Not specified");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ConnectionServerDoesNotSpecified",
-                    ErrorMessage = "Connection Server does Not specified"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.ConnectionServerDoesNotSpecified, CancellationToken.None);
 
         try
         {
             dbm.Open();
             dbm.Close();
-            if (dbm.Database == "")
-                if (withDatabase)
-                {
-                    Logger.LogError("Test Connection Succeeded, But Database name Not specified");
-                    return new Err[]
-                    {
-                        new()
-                        {
-                            ErrorCode = "DatabaseNameDoesNotSpecified",
-                            ErrorMessage = "Test Connection Succeeded, But Database name does Not specified"
-                        }
-                    };
-                }
+            if (dbm.Database == "" && withDatabase) 
+                return await LogErrorAndSendMessageFromError(DbClientErrors.DatabaseNameIsNotSpecified, CancellationToken.None);
 
-            Logger.LogInformation("Test Connection Succeeded");
+            _logger.LogInformation("Test Connection Succeeded");
             return null;
         }
         catch (Exception ex)
         {
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ConnectionFailed",
-                    ErrorMessage = $"Connection Failed {ex.Message}"
-                }
-            };
+            return new[] { DbClientErrors.ConnectionFailed(ex.Message) };
         }
     }
 
@@ -272,16 +194,8 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
 
         try
         {
@@ -298,15 +212,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error in method RegRead");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInRegRead",
-                    ErrorMessage = $"Error in RegRead {ex.Message}"
-                }
-            };
+            return await LogErrorAndSendMessageFromException(ex, nameof(RegRead), cancellationToken);
         }
         finally
         {
@@ -389,16 +295,8 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
 
         try
         {
@@ -419,15 +317,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error in method GetServerString");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInGetServerString",
-                    ErrorMessage = $"Error in GetServerString {ex.Message}"
-                }
-            };
+            return await LogErrorAndSendMessageFromException(ex, nameof(GetServerString), cancellationToken);
         }
         finally
         {
@@ -467,16 +357,8 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
 
         try
         {
@@ -499,16 +381,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            StShared.WriteException(ex, UseConsole, Logger);
-            //throw new Exception("Exception on Get Database info");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInGetDatabaseInfos",
-                    ErrorMessage = $"Error in GetDatabaseInfos {ex.Message}"
-                }
-            };
+            return await LogErrorAndSendMessageFromException(ex, nameof(GetDatabaseInfos), cancellationToken);
         }
         finally
         {
@@ -522,16 +395,8 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
 
         try
         {
@@ -542,15 +407,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            StShared.WriteException(ex, UseConsole, Logger);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInGetServerIntBool",
-                    ErrorMessage = $"Error in GetServerIntBool {ex.Message}"
-                }
-            };
+            return await LogErrorAndSendMessageFromException(ex, nameof(GetServerIntBool), cancellationToken);
         }
         finally
         {
@@ -582,7 +439,7 @@ public sealed class SqlDbClient : DbClient
         CancellationToken cancellationToken)
     {
         var strCommand = $"DBCC CHECKDB(N'{databaseName}') WITH NO_INFOMSGS";
-        return await ExecuteCommandAsync(strCommand, cancellationToken, true);
+        return await ExecuteCommand(strCommand, true, false, cancellationToken);
     }
 
     private async Task<OneOf<List<Tuple<string, string>>, Err[]>> GetStoredProcedureNames(
@@ -592,16 +449,8 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
 
         try
         {
@@ -617,15 +466,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            StShared.WriteException(ex, UseConsole, Logger);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInGetStoredProcedureNames",
-                    ErrorMessage = $"Error in GetStoredProcedureNames {ex.Message}"
-                }
-            };
+            return await LogErrorAndSendMessageFromException(ex, nameof(GetStoredProcedureNames), cancellationToken);
         }
         finally
         {
@@ -640,16 +481,8 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
 
         try
         {
@@ -662,15 +495,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            StShared.WriteException(ex, UseConsole, Logger);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInGetTriggerNames",
-                    ErrorMessage = $"Error in GetTriggerNames {ex.Message}"
-                }
-            };
+            return await LogErrorAndSendMessageFromException(ex, nameof(GetTriggerNames), cancellationToken);
         }
         finally
         {
@@ -685,16 +510,8 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-        {
-            Logger.LogError("Cannot create Database connection");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotCreateDatabaseConnection", ErrorMessage = "Cannot create Database connection"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
 
         try
         {
@@ -721,15 +538,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            StShared.WriteException(ex, UseConsole, Logger);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInGetDatabaseTableNames",
-                    ErrorMessage = $"Error in GetDatabaseTableNames {ex.Message}"
-                }
-            };
+            return await LogErrorAndSendMessageFromException(ex, nameof(GetDatabaseTableNames), cancellationToken);
         }
         finally
         {
@@ -739,13 +548,14 @@ public sealed class SqlDbClient : DbClient
 
     private async Task<Option<Err[]>> RecompileDatabaseObject(string strObjectName, CancellationToken cancellationToken)
     {
-        return await ExecuteCommandAsync($"EXEC sp_recompile [{strObjectName}]", cancellationToken, true);
+        return await ExecuteCommand($"EXEC sp_recompile [{strObjectName}]", true, false, cancellationToken);
     }
 
     private async Task<Option<Err[]>> UpdateStatisticsForOneTable(string strTableName,
         CancellationToken cancellationToken)
     {
-        return await ExecuteCommandAsync($"UPDATE STATISTICS [{strTableName}] WITH FULLSCAN", cancellationToken, true);
+        return await ExecuteCommand($"UPDATE STATISTICS [{strTableName}] WITH FULLSCAN", true, false,
+            cancellationToken);
     }
 
 
@@ -760,9 +570,8 @@ public sealed class SqlDbClient : DbClient
 
         var serverName = await ServerName(cancellationToken);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(null,
-                $"{serverName}_{databaseName} Recompiling Stored Procedures...", cancellationToken);
+        await LogInfoAndSendMessage("{0}_{1} Recompiling Stored Procedures...", serverName, databaseName,
+            cancellationToken);
 
         var getStoredProcedureNamesResult = await GetStoredProcedureNames(cancellationToken);
         if (getStoredProcedureNamesResult.IsT1)
@@ -790,12 +599,11 @@ public sealed class SqlDbClient : DbClient
             catch (Exception ex)
             {
                 StShared.WriteException(ex, $"{serverName}_{databaseName} Error in Recompile Stored Procedures",
-                    UseConsole, Logger);
+                    UseConsole, _logger);
             }
         }
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(null, $"{serverName}_{databaseName} Recompiling Triggers...",
-                cancellationToken);
+
+        await LogInfoAndSendMessage("{0}_{1} Recompiling Triggers...", serverName, databaseName, cancellationToken);
 
         var getTriggerNames = await GetTriggerNames(cancellationToken);
         if (getTriggerNames.IsT1)
@@ -816,22 +624,21 @@ public sealed class SqlDbClient : DbClient
             catch (Exception ex)
             {
                 StShared.WriteException(ex, $"{serverName}_{databaseName} Error in Recompile trigger", UseConsole,
-                    Logger);
+                    _logger);
             }
-        } 
+        }
+
         return null;
     }
 
 
     public override async Task<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken)
     {
-        Logger.LogInformation("Update Statistics for database {databaseName}...", databaseName);
-
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(null, $"Update Statistics for database {databaseName}...",
-                cancellationToken);
 
         var serverName = await ServerName(cancellationToken);
+
+        await LogInfoAndSendMessage("Update Statistics for database {0}_{1}...", serverName, databaseName,
+            cancellationToken);
 
         if (cancellationToken.IsCancellationRequested)
             return new[] { DbToolsErrors.CancellationRequested(nameof(UpdateStatistics)) };
@@ -849,24 +656,17 @@ public sealed class SqlDbClient : DbClient
             {
                 if (cancellationToken.IsCancellationRequested)
                     return new[] { DbToolsErrors.CancellationRequested(nameof(UpdateStatistics)) };
-                var updateStatisticsForOneTableResult = await UpdateStatisticsForOneTable(strTableName, cancellationToken);
+                var updateStatisticsForOneTableResult =
+                    await UpdateStatisticsForOneTable(strTableName, cancellationToken);
                 if (updateStatisticsForOneTableResult.IsSome)
                     return (Err[])updateStatisticsForOneTableResult;
             }
         }
         catch (Exception ex)
         {
-            StShared.WriteException(ex, $"{serverName}_{databaseName} Error in Update Statistics", UseConsole,
-                Logger);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ErrorInUpdateStatistics",
-                    ErrorMessage = $"Error in UpdateStatistics {ex.Message}"
-                }
-            };
+            return await LogErrorAndSendMessageFromException(ex, nameof(UpdateStatistics), cancellationToken);
         }
+
         return null;
     }
 
