@@ -2,6 +2,7 @@
 
 public sealed class RestoreFileModel
 {
+    // ReSharper disable once ConvertToPrimaryConstructor
     public RestoreFileModel(string logicalName, string type)
     {
         LogicalName = logicalName;

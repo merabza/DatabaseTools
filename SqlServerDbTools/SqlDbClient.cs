@@ -34,8 +34,7 @@ public sealed class SqlDbClient : DbClient
     }
 
     public override async Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename,
-        string backupName,
-        EBackupType backupType, bool compression, CancellationToken cancellationToken)
+        string backupName, EBackupType backupType, bool compression, CancellationToken cancellationToken)
     {
         var buTypeWord = "DATABASE";
         if (backupType == EBackupType.TrLog)
