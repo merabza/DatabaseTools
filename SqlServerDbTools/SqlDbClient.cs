@@ -20,6 +20,10 @@ public sealed class SqlDbClient : DbClient
     private readonly ILogger _logger;
     private string? _memoServerInstanceName;
     private string? _memoServerProductVersion;
+    private const string CBackupDirectory = "BackupDirectory";
+    private const string CDefaultData = "DefaultData";
+    private const string CDefaultLog = "DefaultLog";
+    private const string CParameters = "Parameters";
 
     // ReSharper disable once ConvertToPrimaryConstructor
     public SqlDbClient(ILogger logger, SqlConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,
@@ -172,6 +176,84 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
+
+    //ამ მეთოდმა არ იმუშავა. საჭიროა სერვერის მხარეს გაეშვას ბძანებები
+    //ლინუქსუს შემთხვევაში:
+    //sudo /opt/mssql/bin/mssql-conf set filelocation.defaultbackupdir /tmp/backup
+    //sudo /opt/mssql/bin/mssql-conf set filelocation.defaultdatadir /tmp/data
+    //sudo /opt/mssql/bin/mssql-conf set filelocation.defaultlogdir /tmp/log
+    private async Task<Option<Err[]>> RegWrite(string sqlServerProductVersion, string instanceName,
+        string? subRegFolder, string parameterName, string newValue, CancellationToken cancellationToken)
+    {
+        var serverVersionParts = sqlServerProductVersion.Split('.');
+        if (!int.TryParse(serverVersionParts[0], out var serverVersionNum))
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "InvalidSqlServerProductVersion", ErrorMessage = "Invalid Sql Server Product Version"
+                }
+            };
+        if (serverVersionParts.Length <= 1)
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "InvalidSqlServerVersionParts", ErrorMessage = "Invalid Sql Server Version Parts"
+                }
+            };
+
+        // ReSharper disable once using
+        using var dbm = GetDbManager();
+        if (dbm is null)
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+                CancellationToken.None);
+
+        try
+        {
+            dbm.ClearParameters();
+            dbm.Open();
+            var query = serverVersionNum > 10
+                ? $"""
+                   EXEC master.dbo.xp_instance_regwrite 
+                    N'HKEY_LOCAL_MACHINE', 
+                    N'Software\Microsoft\MSSQLServer\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}', 
+                    '{parameterName}', 
+                    REG_SZ, 
+                    N'{newValue}'
+                   """
+                : $"""
+                   EXEC master.dbo.xp_regwrite 
+                    N'HKEY_LOCAL_MACHINE', 
+                    N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}', 
+                    N'{parameterName}', 
+                    REG_SZ, 
+                    N'{newValue}'
+                   """;
+            // ReSharper disable once using
+            var affectedCount = await dbm.ExecuteNonQueryAsync(query, cancellationToken);
+
+            if (affectedCount != 1)
+                return new Err[]
+                {
+                    new()
+                    {
+                        ErrorCode = "ErrorWriteRegData", ErrorMessage = $"Error Write Reg Data {parameterName} => {newValue}"
+                    }
+                };
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return await LogErrorAndSendMessageFromException(ex, nameof(RegWrite), cancellationToken);
+        }
+        finally
+        {
+            dbm.Close();
+        }
+    }
+
     private async Task<OneOf<string?, Err[]>> RegRead(string sqlServerProductVersion, string instanceName,
         string? subRegFolder, string parameterName, CancellationToken cancellationToken)
     {
@@ -228,6 +310,7 @@ public sealed class SqlDbClient : DbClient
         return masterFileName == null ? null : Path.GetDirectoryName(masterFileName[2..]);
     }
 
+    //თუ სპეციალურად არ არის განსაზღვრული, რომელი ფოლდერი უნდა გამოიყენოს სერვერმა ბაზებისათვის, მაშინ იყენებს მასტერის ადგილმდებარეობას
     private async Task<OneOf<string?, Err[]>> DoubleRegRead(string serverProductVersion, string serverInstanceName,
         string parameterName, string subRegFolder, string subParameterName, CancellationToken cancellationToken)
     {
@@ -259,20 +342,20 @@ public sealed class SqlDbClient : DbClient
             return serverInstanceNameResult.AsT1;
         var serverInstanceName = serverInstanceNameResult.AsT0;
         var regReadBackupDirectoryResult = await RegRead(serverProductVersion, serverInstanceName, null,
-            "BackupDirectory", cancellationToken);
+            CBackupDirectory, cancellationToken);
         if (regReadBackupDirectoryResult.IsT1)
             return regReadBackupDirectoryResult.AsT1;
         var backupDirectory = regReadBackupDirectoryResult.AsT0;
 
         //თუ სპეციალურად არ არის განსაზღვრული, რომელი ფოლდერი უნდა გამოიყენოს სერვერმა ბაზებისათვის, მაშინ იყენებს მასტერის ადგილმდებარეობას
-        var regReadDefaultDataResult = await DoubleRegRead(serverProductVersion, serverInstanceName, "DefaultData",
-            "Parameters", "SqlArg0", cancellationToken);
+        var regReadDefaultDataResult = await DoubleRegRead(serverProductVersion, serverInstanceName, CDefaultData,
+            CParameters, "SqlArg0", cancellationToken);
         if (regReadDefaultDataResult.IsT1)
             return regReadDefaultDataResult.AsT1;
         var defaultDataDirectory = regReadDefaultDataResult.AsT0;
 
-        var regReadDefaultLogResult = await DoubleRegRead(serverProductVersion, serverInstanceName, "DefaultLog",
-            "Parameters", "SqlArg1", cancellationToken);
+        var regReadDefaultLogResult = await DoubleRegRead(serverProductVersion, serverInstanceName, CDefaultLog,
+            CParameters, "SqlArg1", cancellationToken);
         if (regReadDefaultLogResult.IsT1)
             return regReadDefaultLogResult.AsT1;
         var defaultLogDirectory = regReadDefaultLogResult.AsT0;
@@ -681,6 +764,36 @@ public sealed class SqlDbClient : DbClient
         {
             return await LogErrorAndSendMessageFromException(ex, nameof(UpdateStatistics), cancellationToken);
         }
+
+        return null;
+    }
+
+    public override async Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
+        string defLogFolder, CancellationToken cancellationToken)
+    {
+        var serverProductVersionResult = await GetServerProductVersion(cancellationToken);
+        if (serverProductVersionResult.IsT1)
+            return serverProductVersionResult.AsT1;
+        var serverProductVersion = serverProductVersionResult.AsT0;
+        var serverInstanceNameResult = await GetServerInstanceName(cancellationToken);
+        if (serverInstanceNameResult.IsT1)
+            return serverInstanceNameResult.AsT1;
+        var serverInstanceName = serverInstanceNameResult.AsT0;
+
+        var regWriteResult = await RegWrite(serverProductVersion, serverInstanceName, null, CBackupDirectory,
+            defBackupFolder, cancellationToken);
+        if (regWriteResult.IsSome)
+            return (Err[])regWriteResult;
+
+        var regWriteDataResult = await RegWrite(serverProductVersion, serverInstanceName, null, CDefaultData,
+            defDataFolder, cancellationToken);
+        if (regWriteDataResult.IsSome)
+            return (Err[])regWriteDataResult;
+
+        var regWriteLogResult = await RegWrite(serverProductVersion, serverInstanceName, null, CDefaultLog,
+            defLogFolder, cancellationToken);
+        if (regWriteLogResult.IsSome)
+            return (Err[])regWriteLogResult;
 
         return null;
     }
