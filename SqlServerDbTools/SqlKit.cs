@@ -24,7 +24,7 @@ public sealed class SqlKit : DbKit
 
     private void sqlConnection_InfoMessage(object sender, SqlInfoMessageEventArgs e)
     {
-        if (!IsInfoMessageUsed()) 
+        if (!IsInfoMessageUsed())
             return;
         foreach (SqlError info in e.Errors)
             RaiseInfoMessageEvent(info.Message, info.Class);

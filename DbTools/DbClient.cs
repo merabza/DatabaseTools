@@ -105,16 +105,23 @@ public /*open*/ abstract class DbClient : MessageLogger
 
     public abstract Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename, string backupName,
         EBackupType backupType, bool compression, CancellationToken cancellationToken);
+
     public abstract Task<OneOf<string, Err[]>> HostPlatform(CancellationToken cancellationToken);
+
     public abstract Task<Option<Err[]>> VerifyBackup(string databaseName, string backupFilename,
         CancellationToken cancellationToken);
+
     public abstract Task<Option<Err[]>> RestoreDatabase(string databaseName, string backupFileFullName,
         List<RestoreFileModel>? files, string dataFolderName, string dataLogFolderName, string dirSeparator,
         CancellationToken cancellationToken);
+
     public abstract Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken);
+
     public abstract Task<OneOf<List<RestoreFileModel>, Err[]>> GetRestoreFiles(string backupFileFullName,
         CancellationToken cancellationToken);
+
     public abstract Task<OneOf<bool, Err[]>> IsServerAllowsCompression(CancellationToken cancellationToken);
+
     //withDatabase იყო True
     public abstract Task<Option<Err[]>> TestConnection(bool withDatabase, CancellationToken cancellationToken);
     public abstract Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken);
@@ -126,6 +133,4 @@ public /*open*/ abstract class DbClient : MessageLogger
 
     public abstract Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
         string defLogFolder, CancellationToken cancellationToken);
-
-
 }

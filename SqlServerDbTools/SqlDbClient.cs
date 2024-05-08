@@ -214,19 +214,19 @@ public sealed class SqlDbClient : DbClient
             dbm.Open();
             var query = serverVersionNum > 10
                 ? $"""
-                   EXEC master.dbo.xp_instance_regwrite 
-                    N'HKEY_LOCAL_MACHINE', 
-                    N'Software\Microsoft\MSSQLServer\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}', 
-                    '{parameterName}', 
-                    REG_SZ, 
+                   EXEC master.dbo.xp_instance_regwrite
+                    N'HKEY_LOCAL_MACHINE',
+                    N'Software\Microsoft\MSSQLServer\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}',
+                    '{parameterName}',
+                    REG_SZ,
                     N'{newValue}'
                    """
                 : $"""
-                   EXEC master.dbo.xp_regwrite 
-                    N'HKEY_LOCAL_MACHINE', 
-                    N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}', 
-                    N'{parameterName}', 
-                    REG_SZ, 
+                   EXEC master.dbo.xp_regwrite
+                    N'HKEY_LOCAL_MACHINE',
+                    N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}',
+                    N'{parameterName}',
+                    REG_SZ,
                     N'{newValue}'
                    """;
             // ReSharper disable once using
@@ -237,7 +237,8 @@ public sealed class SqlDbClient : DbClient
                 {
                     new()
                     {
-                        ErrorCode = "ErrorWriteRegData", ErrorMessage = $"Error Write Reg Data {parameterName} => {newValue}"
+                        ErrorCode = "ErrorWriteRegData",
+                        ErrorMessage = $"Error Write Reg Data {parameterName} => {newValue}"
                     }
                 };
 
@@ -731,7 +732,6 @@ public sealed class SqlDbClient : DbClient
 
     public override async Task<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken)
     {
-
         var serverName = await ServerName(cancellationToken);
 
         await LogInfoAndSendMessage("Update Statistics for database {0}_{1}...", serverName, databaseName,

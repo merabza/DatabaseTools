@@ -30,5 +30,4 @@ public static class DbClientErrors
 
     public static Err ConnectionFailed(string message) => new()
         { ErrorCode = nameof(ConnectionFailed), ErrorMessage = $"Connection Failed {message}" };
-
 }
