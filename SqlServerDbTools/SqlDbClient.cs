@@ -17,13 +17,13 @@ namespace SqlServerDbTools;
 
 public sealed class SqlDbClient : DbClient
 {
-    private readonly ILogger _logger;
-    private string? _memoServerInstanceName;
-    private string? _memoServerProductVersion;
     private const string CBackupDirectory = "BackupDirectory";
     private const string CDefaultData = "DefaultData";
     private const string CDefaultLog = "DefaultLog";
     private const string CParameters = "Parameters";
+    private readonly ILogger _logger;
+    private string? _memoServerInstanceName;
+    private string? _memoServerProductVersion;
 
     // ReSharper disable once ConvertToPrimaryConstructor
     public SqlDbClient(ILogger logger, SqlConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,

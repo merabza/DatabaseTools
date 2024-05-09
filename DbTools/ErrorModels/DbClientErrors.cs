@@ -28,6 +28,8 @@ public static class DbClientErrors
     public static readonly Err DatabaseNameIsNotSpecifiedForBackup = new()
         { ErrorCode = nameof(DatabaseNameIsNotSpecified), ErrorMessage = "Database Name is Not Specified For Backup" };
 
-    public static Err ConnectionFailed(string message) => new()
-        { ErrorCode = nameof(ConnectionFailed), ErrorMessage = $"Connection Failed {message}" };
+    public static Err ConnectionFailed(string message)
+    {
+        return new Err { ErrorCode = nameof(ConnectionFailed), ErrorMessage = $"Connection Failed {message}" };
+    }
 }
