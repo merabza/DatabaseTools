@@ -8,6 +8,7 @@ using DbTools.Models;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using OneOf;
+using SignalRContracts;
 using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor

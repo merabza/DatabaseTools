@@ -2,8 +2,8 @@
 using DbTools;
 using DbTools.Models;
 using Microsoft.Extensions.Logging;
+using SignalRContracts;
 using SqlServerDbTools;
-using SystemToolsShared;
 
 namespace DbToolsFabric;
 
