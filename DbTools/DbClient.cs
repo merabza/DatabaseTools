@@ -11,8 +11,6 @@ using OneOf;
 using SignalRContracts;
 using SystemToolsShared;
 
-// ReSharper disable ConvertToPrimaryConstructor
-
 namespace DbTools;
 
 public /*open*/ abstract class DbClient : MessageLogger
@@ -21,6 +19,7 @@ public /*open*/ abstract class DbClient : MessageLogger
     private readonly DbKit _dbKit;
     protected readonly bool UseConsole;
 
+    // ReSharper disable once ConvertToPrimaryConstructor
     protected DbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,
         IMessagesDataManager? messagesDataManager = null, string? userName = null) : base(logger, messagesDataManager,
         userName, useConsole)
@@ -35,8 +34,6 @@ public /*open*/ abstract class DbClient : MessageLogger
         return DbManager.Create(_dbKit, _conStrBuilder.ConnectionString);
     }
 
-    //public async Task<Option<Err[]>> ExecuteCommand(string strCommand, CancellationToken cancellationToken,
-    //    bool bLogStart = false, bool bLogFinish = false)
     public async Task<Option<Err[]>> ExecuteCommand(string strCommand, bool bLogStart, bool bLogFinish,
         CancellationToken cancellationToken)
     {
