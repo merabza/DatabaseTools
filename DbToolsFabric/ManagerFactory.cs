@@ -5,6 +5,7 @@ using DbTools;
 using Microsoft.Data.Sqlite;
 using SqLiteDbTools;
 using SqlServerDbTools;
+using SystemToolsShared;
 
 namespace DbToolsFabric;
 
