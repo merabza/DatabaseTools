@@ -1,8 +1,8 @@
-﻿using DbTools;
+﻿using System.Data.SqlClient;
+using DbTools;
 using DbTools.Models;
 using Microsoft.Extensions.Logging;
 using SqlServerDbTools;
-using System.Data.SqlClient;
 using SystemToolsShared;
 
 namespace DbToolsFabric;
