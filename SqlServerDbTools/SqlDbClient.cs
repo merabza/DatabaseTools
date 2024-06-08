@@ -11,6 +11,7 @@ using DbTools.Models;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using OneOf;
+using SqlServerDbTools.Errors;
 using SystemToolsShared;
 using SystemToolsShared.Errors;
 
