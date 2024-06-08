@@ -1,6 +1,6 @@
 ﻿using SystemToolsShared.Errors;
 
-namespace DbTools;
+namespace DbTools.Errors;
 
 public static class DbToolsErrors
 {
