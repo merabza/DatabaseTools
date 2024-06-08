@@ -1,6 +1,6 @@
 ﻿using SystemToolsShared;
 
-namespace DbTools.ErrorModels;
+namespace DbTools.Errors;
 
 public static class DbClientErrors
 {
@@ -32,4 +32,7 @@ public static class DbClientErrors
     {
         return new Err { ErrorCode = nameof(ConnectionFailed), ErrorMessage = $"Connection Failed {message}" };
     }
+
+    public static Err ExecuteScalarAsyncResultIsNull() => new()
+        { ErrorCode = nameof(ExecuteScalarAsyncResultIsNull), ErrorMessage = "ExecuteScalarAsync Result Is Null" };
 }

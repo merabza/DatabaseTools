@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DbTools;
-using DbTools.ErrorModels;
+using DbTools.Errors;
 using DbTools.Models;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
@@ -186,21 +186,9 @@ public sealed class SqlDbClient : DbClient
     {
         var serverVersionParts = sqlServerProductVersion.Split('.');
         if (!int.TryParse(serverVersionParts[0], out var serverVersionNum))
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "InvalidSqlServerProductVersion", ErrorMessage = "Invalid Sql Server Product Version"
-                }
-            };
+            return new[] { SqlDbClientErrors.InvalidSqlServerProductVersion };
         if (serverVersionParts.Length <= 1)
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "InvalidSqlServerVersionParts", ErrorMessage = "Invalid Sql Server Version Parts"
-                }
-            };
+            return new[] {SqlDbClientErrors.InvalidSqlServerVersionParts };
 
         // ReSharper disable once using
         using var dbm = GetDbManager();
@@ -232,17 +220,7 @@ public sealed class SqlDbClient : DbClient
             // ReSharper disable once using
             var affectedCount = await dbm.ExecuteNonQueryAsync(query, cancellationToken);
 
-            if (affectedCount != 1)
-                return new Err[]
-                {
-                    new()
-                    {
-                        ErrorCode = "ErrorWriteRegData",
-                        ErrorMessage = $"Error Write Reg Data {parameterName} => {newValue}"
-                    }
-                };
-
-            return null;
+            return affectedCount != 1 ? new[] { SqlDbClientErrors.ErrorWriteRegData(parameterName, newValue) } : null;
         }
         catch (Exception ex)
         {
@@ -259,21 +237,9 @@ public sealed class SqlDbClient : DbClient
     {
         var serverVersionParts = sqlServerProductVersion.Split('.');
         if (!int.TryParse(serverVersionParts[0], out var serverVersionNum))
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "InvalidSqlServerProductVersion", ErrorMessage = "Invalid Sql Server Product Version"
-                }
-            };
+            return new[] { SqlDbClientErrors.InvalidSqlServerProductVersion };
         if (serverVersionParts.Length <= 1)
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "InvalidSqlServerVersionParts", ErrorMessage = "Invalid Sql Server Version Parts"
-                }
-            };
+            return new[] { SqlDbClientErrors.InvalidSqlServerVersionParts };
 
         // ReSharper disable once using
         using var dbm = GetDbManager();
@@ -389,14 +355,7 @@ public sealed class SqlDbClient : DbClient
             dbm.Open();
             var executeScalarAsyncResult = await dbm.ExecuteScalarAsync<string>(query, cancellationToken) ?? defString;
             if (executeScalarAsyncResult is null)
-                return new Err[]
-                {
-                    new()
-                    {
-                        ErrorCode = "ServerStringIsNull",
-                        ErrorMessage = "Server string is null"
-                    }
-                };
+                return new[] { SqlDbClientErrors.ServerStringIsNull };
             _memoServerProductVersion = executeScalarAsyncResult;
             return _memoServerProductVersion;
         }
@@ -418,11 +377,7 @@ public sealed class SqlDbClient : DbClient
         const string query = "SELECT SERVERPROPERTY('productversion')";
         var getServerStringResult = await GetServerString(query, cancellationToken);
         if (getServerStringResult.IsT1)
-            return Err.RecreateErrors(getServerStringResult.AsT1,
-                new Err
-                {
-                    ErrorCode = "ProductVersionIsNotDetected", ErrorMessage = "Product Version is not detected"
-                });
+            return Err.RecreateErrors(getServerStringResult.AsT1, SqlDbClientErrors.ProductVersionIsNotDetected);
         _memoServerProductVersion = getServerStringResult.AsT0;
         return _memoServerProductVersion;
     }
@@ -436,11 +391,7 @@ public sealed class SqlDbClient : DbClient
         const string query = "SELECT @@servicename";
         var getServerStringResult = await GetServerString(query, cancellationToken);
         if (getServerStringResult.IsT1)
-            return Err.RecreateErrors(getServerStringResult.AsT1,
-                new Err
-                {
-                    ErrorCode = "ServerInstanceNameIsNotDetected", ErrorMessage = "Server Instance Name is not detected"
-                });
+            return Err.RecreateErrors(getServerStringResult.AsT1, SqlDbClientErrors.ServerInstanceNameIsNotDetected);
         _memoServerInstanceName = getServerStringResult.AsT0;
         return _memoServerInstanceName;
     }
@@ -524,11 +475,7 @@ public sealed class SqlDbClient : DbClient
         const string queryString = "SELECT CONNECTIONPROPERTY('client_net_address') AS client_net_address";
         var getServerStringResult = await GetServerString(queryString, cancellationToken);
         if (getServerStringResult.IsT1)
-            return Err.RecreateErrors(getServerStringResult.AsT1,
-                new Err
-                {
-                    ErrorCode = "ClientNetAddressIsNotDetected", ErrorMessage = "Client Net Address is not detected"
-                });
+            return Err.RecreateErrors(getServerStringResult.AsT1, SqlDbClientErrors.ClientNetAddressIsNotDetected);
         var clientNetAddress = getServerStringResult.AsT0;
         return clientNetAddress is "<local machine>" or "127.0.0.1";
     }
@@ -803,11 +750,7 @@ public sealed class SqlDbClient : DbClient
         const string query = "SELECT @@servername";
         var getServerStringResult = await GetServerString(query, cancellationToken);
         if (getServerStringResult.IsT1)
-            return Err.RecreateErrors(getServerStringResult.AsT1,
-                new Err
-                {
-                    ErrorCode = "ServerNameIsNotDetected", ErrorMessage = "Server name is not detected"
-                });
+            return Err.RecreateErrors(getServerStringResult.AsT1, SqlDbClientErrors.ServerNameIsNotDetected);
         return getServerStringResult.AsT0;
     }
 }

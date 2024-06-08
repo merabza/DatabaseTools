@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
-using DbTools.ErrorModels;
+using DbTools.Errors;
 using DbTools.Models;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
@@ -81,13 +81,7 @@ public /*open*/ abstract class DbClient : MessageLogger
             dbm.Open();
             var executeScalarAsyncResult = await dbm.ExecuteScalarAsync<T>(queryString, cancellationToken);
             if (executeScalarAsyncResult is null)
-                return new Err[]
-                {
-                    new()
-                    {
-                        ErrorCode = "ExecuteScalarAsyncResultIsNull", ErrorMessage = "ExecuteScalarAsync Result Is Null"
-                    }
-                };
+                return new[] { DbClientErrors.ExecuteScalarAsyncResultIsNull() };
             return executeScalarAsyncResult;
         }
         catch (Exception ex)
