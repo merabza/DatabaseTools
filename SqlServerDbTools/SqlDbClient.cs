@@ -190,7 +190,7 @@ public sealed class SqlDbClient : DbClient
         if (!int.TryParse(serverVersionParts[0], out var serverVersionNum))
             return new[] { SqlDbClientErrors.InvalidSqlServerProductVersion };
         if (serverVersionParts.Length <= 1)
-            return new[] {SqlDbClientErrors.InvalidSqlServerVersionParts };
+            return new[] { SqlDbClientErrors.InvalidSqlServerVersionParts };
 
         // ReSharper disable once using
         using var dbm = GetDbManager();
