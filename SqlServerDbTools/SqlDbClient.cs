@@ -41,14 +41,14 @@ public sealed class SqlDbClient : DbClient
         var buTypeWord = "DATABASE";
         if (backupType == EBackupType.TrLog)
             buTypeWord = "LOG";
-        var buDifferentialWord = "";
+        var buDifferentialWord = string.Empty;
         if (backupType == EBackupType.Diff)
             buDifferentialWord = "DIFFERENTIAL, ";
 
         return await ExecuteCommand($"""
                                      BACKUP {buTypeWord} [{databaseName}]
                                      TO DISK=N'{backupFilename}'
-                                     WITH {buDifferentialWord}NOFORMAT, NOINIT, NAME = N'{backupName}', SKIP, REWIND, NOUNLOAD{(compression ? ", COMPRESSION" : "")}
+                                     WITH {buDifferentialWord}NOFORMAT, NOINIT, NAME = N'{backupName}', SKIP, REWIND, NOUNLOAD{(compression ? ", COMPRESSION" : string.Empty)}
                                      """, false, false, cancellationToken);
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
         //თუმცა თუ STATS მითითებული არ აქვს ავტომატურად აკეთებს STATS=10
@@ -156,7 +156,7 @@ public sealed class SqlDbClient : DbClient
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
-        if (dbm.ConnectionString == "")
+        if (dbm.ConnectionString == string.Empty)
             return await LogErrorAndSendMessageFromError(DbClientErrors.ConnectionServerDoesNotSpecified,
                 CancellationToken.None);
 
@@ -164,7 +164,7 @@ public sealed class SqlDbClient : DbClient
         {
             dbm.Open();
             dbm.Close();
-            if (dbm.Database == "" && withDatabase)
+            if (dbm.Database == string.Empty && withDatabase)
                 return await LogErrorAndSendMessageFromError(DbClientErrors.DatabaseNameIsNotSpecified,
                     CancellationToken.None);
 
@@ -206,7 +206,7 @@ public sealed class SqlDbClient : DbClient
                 ? $"""
                    EXEC master.dbo.xp_instance_regwrite
                     N'HKEY_LOCAL_MACHINE',
-                    N'Software\Microsoft\MSSQLServer\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}',
+                    N'Software\Microsoft\MSSQLServer\MSSQLServer{(subRegFolder == null ? string.Empty : $@"\{subRegFolder}")}',
                     '{parameterName}',
                     REG_SZ,
                     N'{newValue}'
@@ -214,7 +214,7 @@ public sealed class SqlDbClient : DbClient
                 : $"""
                    EXEC master.dbo.xp_regwrite
                     N'HKEY_LOCAL_MACHINE',
-                    N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}',
+                    N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{(subRegFolder == null ? string.Empty : $@"\{subRegFolder}")}',
                     N'{parameterName}',
                     REG_SZ,
                     N'{newValue}'
@@ -254,8 +254,8 @@ public sealed class SqlDbClient : DbClient
             dbm.ClearParameters();
             dbm.Open();
             var query = serverVersionNum > 10
-                ? $@"EXEC master.dbo.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'Software\Microsoft\MSSQLServer\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}', '{parameterName}'"
-                : $@"EXEC master.dbo.xp_regread N'HKEY_LOCAL_MACHINE', N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{(subRegFolder == null ? "" : $@"\{subRegFolder}")}', N'{parameterName}'";
+                ? $@"EXEC master.dbo.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'Software\Microsoft\MSSQLServer\MSSQLServer{(subRegFolder == null ? string.Empty : $@"\{subRegFolder}")}', '{parameterName}'"
+                : $@"EXEC master.dbo.xp_regread N'HKEY_LOCAL_MACHINE', N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{(subRegFolder == null ? string.Empty : $@"\{subRegFolder}")}', N'{parameterName}'";
             // ReSharper disable once using
             using var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
             if (reader.Read())

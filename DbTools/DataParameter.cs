@@ -4,11 +4,13 @@ namespace DbTools;
 
 public sealed class DataParameter
 {
+
+    // ReSharper disable once ConvertToPrimaryConstructor
     public DataParameter(string parameterName)
     {
         //IsNullable = false;
         Direction = ParameterDirection.Input;
-        SourceColumn = "";
+        SourceColumn = string.Empty;
         SourceVersion = DataRowVersion.Current;
         ParameterName = parameterName;
     }
