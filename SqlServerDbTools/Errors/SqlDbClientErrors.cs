@@ -34,6 +34,11 @@ public static class SqlDbClientErrors
     public static readonly Err NeedCommitError = new()
         { ErrorCode = nameof(NeedCommitError), ErrorMessage = "Error when detecting Need Commit" };
 
-    public static Err ErrorWriteRegData(string parameterName, string newValue) => new()
-        { ErrorCode = nameof(ErrorWriteRegData), ErrorMessage = $"Error Write Reg Data {parameterName} => {newValue}" };
+    public static Err ErrorWriteRegData(string parameterName, string newValue)
+    {
+        return new Err
+        {
+            ErrorCode = nameof(ErrorWriteRegData), ErrorMessage = $"Error Write Reg Data {parameterName} => {newValue}"
+        };
+    }
 }

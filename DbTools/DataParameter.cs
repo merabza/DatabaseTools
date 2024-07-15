@@ -4,7 +4,6 @@ namespace DbTools;
 
 public sealed class DataParameter
 {
-
     // ReSharper disable once ConvertToPrimaryConstructor
     public DataParameter(string parameterName)
     {
