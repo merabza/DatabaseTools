@@ -2,6 +2,7 @@
 
 public sealed class InfoMessageEventArgs
 {
+    // ReSharper disable once ConvertToPrimaryConstructor
     public InfoMessageEventArgs(string message, byte cls)
     {
         Message = message;

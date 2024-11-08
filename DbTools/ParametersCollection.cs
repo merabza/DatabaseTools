@@ -11,9 +11,10 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
     private readonly List<DataParameter> _dbParameters;
     private readonly Dictionary<string, DataParameter> _dbParametersByNames;
 
+    // ReSharper disable once ConvertConstructorToMemberInitializers
     public ParametersCollection()
     {
-        _dbParameters = new List<DataParameter>();
+        _dbParameters = [];
         _dbParametersByNames = new Dictionary<string, DataParameter>();
     }
 

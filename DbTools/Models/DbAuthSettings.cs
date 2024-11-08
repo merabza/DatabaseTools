@@ -2,6 +2,7 @@
 
 public sealed class DbAuthSettings : DbAuthSettingsBase
 {
+    // ReSharper disable once ConvertToPrimaryConstructor
     public DbAuthSettings(string serverUser, string serverPass)
     {
         ServerUser = serverUser;
