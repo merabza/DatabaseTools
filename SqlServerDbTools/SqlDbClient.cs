@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -9,6 +8,7 @@ using DbTools;
 using DbTools.Errors;
 using DbTools.Models;
 using LanguageExt;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SqlServerDbTools.Errors;

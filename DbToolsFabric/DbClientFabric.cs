@@ -1,6 +1,6 @@
-﻿using System.Data.SqlClient;
-using DbTools;
+﻿using DbTools;
 using DbTools.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using SqlServerDbTools;
 using SystemToolsShared;
