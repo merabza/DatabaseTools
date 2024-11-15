@@ -10,7 +10,7 @@ namespace DbToolsFabric;
 public static class DbClientFabric
 {
     public static DbClient? GetDbClient(ILogger logger, bool useConsole, EDataProvider dataProvider,
-        string serverAddress, DbAuthSettingsBase dbAuthSettingsBase, string? applicationName,
+        string serverAddress, DbAuthSettingsBase dbAuthSettingsBase, bool trustServerCertificate, string? applicationName,
         string? databaseName = null, IMessagesDataManager? messagesDataManager = null, string? userName = null)
     {
         switch (dataProvider)
@@ -26,7 +26,7 @@ public static class DbClientFabric
 
                 conStrBuilder.DataSource = serverAddress;
                 conStrBuilder.ApplicationName = applicationName;
-                conStrBuilder.TrustServerCertificate = true;
+                conStrBuilder.TrustServerCertificate = trustServerCertificate;
 
                 if (databaseName != null)
                     conStrBuilder.InitialCatalog = databaseName;
