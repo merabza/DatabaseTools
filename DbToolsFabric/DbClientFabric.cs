@@ -26,6 +26,7 @@ public static class DbClientFabric
 
                 conStrBuilder.DataSource = serverAddress;
                 conStrBuilder.ApplicationName = applicationName;
+                conStrBuilder.TrustServerCertificate = true;
 
                 if (databaseName != null)
                     conStrBuilder.InitialCatalog = databaseName;
