@@ -150,7 +150,7 @@ public sealed class DbManager : IDisposable
         return _dbCommand?.ExecuteScalar();
     }
 
-    private async Task<object?> ExecuteScalarAsync(CancellationToken cancellationToken)
+    private async Task<object?> ExecuteScalarAsync(CancellationToken cancellationToken = default)
     {
         if (_dbCommand is null)
             return null;
@@ -191,7 +191,7 @@ public sealed class DbManager : IDisposable
         return _dbCommand?.ExecuteNonQuery() ?? 0;
     }
 
-    private async Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
+    private async Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken = default)
     {
         if (_dbCommand is null)
             return 0;
@@ -218,7 +218,7 @@ public sealed class DbManager : IDisposable
         return _dataReader;
     }
 
-    private async Task<IDataReader> ExecuteReaderAsync(CancellationToken cancellationToken)
+    private async Task<IDataReader> ExecuteReaderAsync(CancellationToken cancellationToken = default)
     {
         if (_dbCommand is null)
             throw new InvalidOperationException();

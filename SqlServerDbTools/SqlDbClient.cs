@@ -36,7 +36,7 @@ public sealed class SqlDbClient : DbClient
     }
 
     public override async Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename,
-        string backupName, EBackupType backupType, bool compression, CancellationToken cancellationToken)
+        string backupName, EBackupType backupType, bool compression, CancellationToken cancellationToken = default)
     {
         var buTypeWord = "DATABASE";
         if (backupType == EBackupType.TrLog)
@@ -55,14 +55,14 @@ public sealed class SqlDbClient : DbClient
         //STATS [ = percentage ] Displays a message each time another percentage completes, and is used to gauge progress. If percentage is omitted, SQL Server displays a message after each 10 percent is completed.
     }
 
-    public override async Task<OneOf<string, Err[]>> HostPlatform(CancellationToken cancellationToken)
+    public override async Task<OneOf<string, Err[]>> HostPlatform(CancellationToken cancellationToken = default)
     {
         const string queryString = "SELECT host_platform FROM sys.dm_os_host_info";
         return await ExecuteScalarAsync<string>(queryString, cancellationToken);
     }
 
     public override async Task<Option<Err[]>> VerifyBackup(string databaseName, string backupFilename,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return await ExecuteCommand(
             $"""
@@ -83,14 +83,14 @@ public sealed class SqlDbClient : DbClient
     }
 
     public override async Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         const string query = "select count(*) from master.dbo.sysdatabases where name=@database";
         return await GetServerIntBool(query, cancellationToken, databaseName);
     }
 
     public override async Task<OneOf<List<RestoreFileModel>, Err[]>> GetRestoreFiles(string backupFileFullName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
         using var dbm = GetDbManager();
@@ -123,7 +123,7 @@ public sealed class SqlDbClient : DbClient
 
     public override async Task<Option<Err[]>> RestoreDatabase(string databaseName, string backupFileFullName,
         List<RestoreFileModel>? files, string dataFolderName, string dataLogFolderName, string dirSeparator,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         if (files == null)
             return await LogErrorAndSendMessageFromError(DbClientErrors.NoRestoreFileNames, cancellationToken);
@@ -148,7 +148,7 @@ public sealed class SqlDbClient : DbClient
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
     }
 
-    public override async Task<Option<Err[]>> TestConnection(bool withDatabase, CancellationToken cancellationToken)
+    public override async Task<Option<Err[]>> TestConnection(bool withDatabase, CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
         using var dbm = GetDbManager();
@@ -184,7 +184,7 @@ public sealed class SqlDbClient : DbClient
     //sudo /opt/mssql/bin/mssql-conf set filelocation.defaultdatadir /tmp/data
     //sudo /opt/mssql/bin/mssql-conf set filelocation.defaultlogdir /tmp/log
     private async Task<Option<Err[]>> RegWrite(string sqlServerProductVersion, string instanceName,
-        string? subRegFolder, string parameterName, string newValue, CancellationToken cancellationToken)
+        string? subRegFolder, string parameterName, string newValue, CancellationToken cancellationToken = default)
     {
         var serverVersionParts = sqlServerProductVersion.Split('.');
         if (!int.TryParse(serverVersionParts[0], out var serverVersionNum))
@@ -235,7 +235,7 @@ public sealed class SqlDbClient : DbClient
     }
 
     private async Task<OneOf<string?, Err[]>> RegRead(string sqlServerProductVersion, string instanceName,
-        string? subRegFolder, string parameterName, CancellationToken cancellationToken)
+        string? subRegFolder, string parameterName, CancellationToken cancellationToken = default)
     {
         var serverVersionParts = sqlServerProductVersion.Split('.');
         if (!int.TryParse(serverVersionParts[0], out var serverVersionNum))
@@ -280,7 +280,7 @@ public sealed class SqlDbClient : DbClient
 
     //თუ სპეციალურად არ არის განსაზღვრული, რომელი ფოლდერი უნდა გამოიყენოს სერვერმა ბაზებისათვის, მაშინ იყენებს მასტერის ადგილმდებარეობას
     private async Task<OneOf<string?, Err[]>> DoubleRegRead(string serverProductVersion, string serverInstanceName,
-        string parameterName, string subRegFolder, string subParameterName, CancellationToken cancellationToken)
+        string parameterName, string subRegFolder, string subParameterName, CancellationToken cancellationToken = default)
     {
         var regReadDefaultDataResult = await RegRead(serverProductVersion, serverInstanceName, null, parameterName,
             cancellationToken);
@@ -299,7 +299,7 @@ public sealed class SqlDbClient : DbClient
         return GetMasterDir(regReadParametersResult0.AsT0);
     }
 
-    public override async Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken)
+    public override async Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken = default)
     {
         var serverProductVersionResult = await GetServerProductVersion(cancellationToken);
         if (serverProductVersionResult.IsT1)
@@ -371,7 +371,7 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-    private async Task<OneOf<string, Err[]>> GetServerProductVersion(CancellationToken cancellationToken)
+    private async Task<OneOf<string, Err[]>> GetServerProductVersion(CancellationToken cancellationToken = default)
     {
         if (_memoServerProductVersion != null)
             return _memoServerProductVersion;
@@ -384,7 +384,7 @@ public sealed class SqlDbClient : DbClient
         return _memoServerProductVersion;
     }
 
-    private async Task<OneOf<string, Err[]>> GetServerInstanceName(CancellationToken cancellationToken)
+    private async Task<OneOf<string, Err[]>> GetServerInstanceName(CancellationToken cancellationToken = default)
     {
         if (_memoServerInstanceName != null)
             return _memoServerInstanceName;
@@ -399,7 +399,7 @@ public sealed class SqlDbClient : DbClient
     }
 
     public override async Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseInfos(
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
         using var dbm = GetDbManager();
@@ -462,7 +462,7 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-    public override async Task<OneOf<bool, Err[]>> IsServerAllowsCompression(CancellationToken cancellationToken)
+    public override async Task<OneOf<bool, Err[]>> IsServerAllowsCompression(CancellationToken cancellationToken = default)
     {
         const string query = """
                              SELECT count(value)
@@ -472,7 +472,7 @@ public sealed class SqlDbClient : DbClient
         return await GetServerIntBool(query, cancellationToken);
     }
 
-    public override async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken)
+    public override async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken = default)
     {
         const string queryString = "SELECT CONNECTIONPROPERTY('client_net_address') AS client_net_address";
         var getServerStringResult = await GetServerString(queryString, cancellationToken);
@@ -483,14 +483,14 @@ public sealed class SqlDbClient : DbClient
     }
 
     public override async Task<Option<Err[]>> CheckRepairDatabase(string databaseName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var strCommand = $"DBCC CHECKDB(N'{databaseName}') WITH NO_INFOMSGS";
         return await ExecuteCommand(strCommand, true, false, cancellationToken);
     }
 
     private async Task<OneOf<List<Tuple<string, string>>, Err[]>> GetStoredProcedureNames(
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
 
     {
         // ReSharper disable once using
@@ -521,7 +521,7 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-    private async Task<OneOf<List<string>, Err[]>> GetTriggerNames(CancellationToken cancellationToken)
+    private async Task<OneOf<List<string>, Err[]>> GetTriggerNames(CancellationToken cancellationToken = default)
     {
         var triggers = new List<string>();
 
@@ -552,7 +552,7 @@ public sealed class SqlDbClient : DbClient
         return triggers;
     }
 
-    private async Task<OneOf<List<string>, Err[]>> GetDatabaseTableNames(CancellationToken cancellationToken)
+    private async Task<OneOf<List<string>, Err[]>> GetDatabaseTableNames(CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
         using var dbm = GetDbManager();
@@ -593,13 +593,13 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-    private async Task<Option<Err[]>> RecompileDatabaseObject(string strObjectName, CancellationToken cancellationToken)
+    private async Task<Option<Err[]>> RecompileDatabaseObject(string strObjectName, CancellationToken cancellationToken = default)
     {
         return await ExecuteCommand($"EXEC sp_recompile [{strObjectName}]", true, false, cancellationToken);
     }
 
     private async Task<Option<Err[]>> UpdateStatisticsForOneTable(string strTableName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return await ExecuteCommand($"UPDATE STATISTICS [{strTableName}] WITH FULLSCAN", true, false,
             cancellationToken);
@@ -607,7 +607,7 @@ public sealed class SqlDbClient : DbClient
 
 
     public override async Task<Option<Err[]>> RecompileProcedures(string databaseName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage("Recompiling Tables, views and triggers for database {0}...",
             databaseName, cancellationToken);
@@ -679,7 +679,7 @@ public sealed class SqlDbClient : DbClient
     }
 
 
-    public override async Task<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken)
+    public override async Task<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken = default)
     {
         var serverName = await ServerName(cancellationToken);
 
@@ -717,7 +717,7 @@ public sealed class SqlDbClient : DbClient
     }
 
     public override async Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
-        string defLogFolder, CancellationToken cancellationToken)
+        string defLogFolder, CancellationToken cancellationToken = default)
     {
         var serverProductVersionResult = await GetServerProductVersion(cancellationToken);
         if (serverProductVersionResult.IsT1)
@@ -747,7 +747,7 @@ public sealed class SqlDbClient : DbClient
     }
 
 
-    private async Task<OneOf<string, Err[]>> ServerName(CancellationToken cancellationToken)
+    private async Task<OneOf<string, Err[]>> ServerName(CancellationToken cancellationToken = default)
     {
         const string query = "SELECT @@servername";
         var getServerStringResult = await GetServerString(query, cancellationToken);
