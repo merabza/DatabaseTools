@@ -36,7 +36,7 @@ public sealed class SqlDbClient : DbClient
         _logger = logger;
     }
 
-    public override async Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename,
+    public override Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename,
         string backupName, EBackupType backupType, bool compression, CancellationToken cancellationToken = default)
     {
         var buTypeWord = "DATABASE";
@@ -46,26 +46,26 @@ public sealed class SqlDbClient : DbClient
         if (backupType == EBackupType.Diff)
             buDifferentialWord = "DIFFERENTIAL, ";
 
-        return await ExecuteCommand($"""
-                                     BACKUP {buTypeWord} [{databaseName}]
-                                     TO DISK=N'{backupFilename}'
-                                     WITH {buDifferentialWord}NOFORMAT, NOINIT, NAME = N'{backupName}', SKIP, REWIND, NOUNLOAD{(compression ? ", COMPRESSION" : string.Empty)}
-                                     """, false, false, cancellationToken);
+        return ExecuteCommand($"""
+                               BACKUP {buTypeWord} [{databaseName}]
+                               TO DISK=N'{backupFilename}'
+                               WITH {buDifferentialWord}NOFORMAT, NOINIT, NAME = N'{backupName}', SKIP, REWIND, NOUNLOAD{(compression ? ", COMPRESSION" : string.Empty)}
+                               """, false, false, cancellationToken);
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
         //თუმცა თუ STATS მითითებული არ აქვს ავტომატურად აკეთებს STATS=10
         //STATS [ = percentage ] Displays a message each time another percentage completes, and is used to gauge progress. If percentage is omitted, SQL Server displays a message after each 10 percent is completed.
     }
 
-    public override async Task<OneOf<string, Err[]>> HostPlatform(CancellationToken cancellationToken = default)
+    public override Task<OneOf<string, Err[]>> HostPlatform(CancellationToken cancellationToken = default)
     {
         const string queryString = "SELECT host_platform FROM sys.dm_os_host_info";
-        return await ExecuteScalarAsync<string>(queryString, cancellationToken);
+        return ExecuteScalarAsync<string>(queryString, cancellationToken);
     }
 
-    public override async Task<Option<Err[]>> VerifyBackup(string databaseName, string backupFilename,
+    public override Task<Option<Err[]>> VerifyBackup(string databaseName, string backupFilename,
         CancellationToken cancellationToken = default)
     {
-        return await ExecuteCommand(
+        return ExecuteCommand(
             $"""
              DECLARE @backupSetId as int
              SELECT @backupSetId = position
@@ -83,11 +83,11 @@ public sealed class SqlDbClient : DbClient
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
     }
 
-    public override async Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName,
+    public override Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName,
         CancellationToken cancellationToken = default)
     {
         const string query = "select count(*) from master.dbo.sysdatabases where name=@database";
-        return await GetServerIntBool(query, cancellationToken, databaseName);
+        return GetServerIntBool(query, cancellationToken, databaseName);
     }
 
     public override async Task<OneOf<List<RestoreFileModel>, Err[]>> GetRestoreFiles(string backupFileFullName,
@@ -467,7 +467,7 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-    public override async Task<OneOf<bool, Err[]>> IsServerAllowsCompression(
+    public override Task<OneOf<bool, Err[]>> IsServerAllowsCompression(
         CancellationToken cancellationToken = default)
     {
         const string query = """
@@ -475,7 +475,7 @@ public sealed class SqlDbClient : DbClient
                              FROM sys.configurations
                              WHERE name = 'backup compression default' AND maximum > 0
                              """;
-        return await GetServerIntBool(query, cancellationToken);
+        return GetServerIntBool(query, cancellationToken);
     }
 
     public override async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken = default)
@@ -488,11 +488,11 @@ public sealed class SqlDbClient : DbClient
         return clientNetAddress is "<local machine>" or "127.0.0.1";
     }
 
-    public override async Task<Option<Err[]>> CheckRepairDatabase(string databaseName,
+    public override Task<Option<Err[]>> CheckRepairDatabase(string databaseName,
         CancellationToken cancellationToken = default)
     {
         var strCommand = $"DBCC CHECKDB(N'{databaseName}') WITH NO_INFOMSGS";
-        return await ExecuteCommand(strCommand, true, false, cancellationToken);
+        return ExecuteCommand(strCommand, true, false, cancellationToken);
     }
 
     private async Task<OneOf<List<Tuple<string, string>>, Err[]>> GetStoredProcedureNames(
