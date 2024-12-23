@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -103,7 +104,7 @@ public sealed class SqlDbClient : DbClient
             var query = $"RESTORE FILELISTONLY FROM  DISK = N'{backupFileFullName}' WITH  NOUNLOAD,  FILE = 1";
             dbm.Open();
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
+            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             var fileNames = new List<RestoreFileModel>();
             while (reader.Read())
                 fileNames.Add(new RestoreFileModel((string)reader["LogicalName"],
@@ -148,7 +149,8 @@ public sealed class SqlDbClient : DbClient
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
     }
 
-    public override async Task<Option<Err[]>> TestConnection(bool withDatabase, CancellationToken cancellationToken = default)
+    public override async Task<Option<Err[]>> TestConnection(bool withDatabase,
+        CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
         using var dbm = GetDbManager();
@@ -220,7 +222,7 @@ public sealed class SqlDbClient : DbClient
                     N'{newValue}'
                    """;
             // ReSharper disable once using
-            var affectedCount = await dbm.ExecuteNonQueryAsync(query, cancellationToken);
+            var affectedCount = await dbm.ExecuteNonQueryAsync(query, CommandType.Text, cancellationToken);
 
             return affectedCount != 1 ? new[] { SqlDbClientErrors.ErrorWriteRegData(parameterName, newValue) } : null;
         }
@@ -234,7 +236,7 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-    private async Task<OneOf<string?, Err[]>> RegRead(string sqlServerProductVersion, string instanceName,
+    private async ValueTask<OneOf<string?, Err[]>> RegRead(string sqlServerProductVersion, string instanceName,
         string? subRegFolder, string parameterName, CancellationToken cancellationToken = default)
     {
         var serverVersionParts = sqlServerProductVersion.Split('.');
@@ -257,7 +259,7 @@ public sealed class SqlDbClient : DbClient
                 ? $@"EXEC master.dbo.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'Software\Microsoft\MSSQLServer\MSSQLServer{(subRegFolder == null ? string.Empty : $@"\{subRegFolder}")}', '{parameterName}'"
                 : $@"EXEC master.dbo.xp_regread N'HKEY_LOCAL_MACHINE', N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{(subRegFolder == null ? string.Empty : $@"\{subRegFolder}")}', N'{parameterName}'";
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
+            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             if (reader.Read())
                 return reader.GetString(1);
             return (string?)null;
@@ -280,7 +282,8 @@ public sealed class SqlDbClient : DbClient
 
     //თუ სპეციალურად არ არის განსაზღვრული, რომელი ფოლდერი უნდა გამოიყენოს სერვერმა ბაზებისათვის, მაშინ იყენებს მასტერის ადგილმდებარეობას
     private async Task<OneOf<string?, Err[]>> DoubleRegRead(string serverProductVersion, string serverInstanceName,
-        string parameterName, string subRegFolder, string subParameterName, CancellationToken cancellationToken = default)
+        string parameterName, string subRegFolder, string subParameterName,
+        CancellationToken cancellationToken = default)
     {
         var regReadDefaultDataResult = await RegRead(serverProductVersion, serverInstanceName, null, parameterName,
             cancellationToken);
@@ -299,7 +302,8 @@ public sealed class SqlDbClient : DbClient
         return GetMasterDir(regReadParametersResult0.AsT0);
     }
 
-    public override async Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken = default)
+    public override async Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(
+        CancellationToken cancellationToken = default)
     {
         var serverProductVersionResult = await GetServerProductVersion(cancellationToken);
         if (serverProductVersionResult.IsT1)
@@ -355,7 +359,8 @@ public sealed class SqlDbClient : DbClient
         {
             dbm.ClearParameters();
             dbm.Open();
-            var executeScalarAsyncResult = await dbm.ExecuteScalarAsync<string>(query, cancellationToken) ?? defString;
+            var executeScalarAsyncResult =
+                await dbm.ExecuteScalarAsync<string>(query, null, CommandType.Text, cancellationToken) ?? defString;
             if (executeScalarAsyncResult is null)
                 return new[] { SqlDbClientErrors.ServerStringIsNull };
             _memoServerProductVersion = executeScalarAsyncResult;
@@ -371,7 +376,7 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-    private async Task<OneOf<string, Err[]>> GetServerProductVersion(CancellationToken cancellationToken = default)
+    private async ValueTask<OneOf<string, Err[]>> GetServerProductVersion(CancellationToken cancellationToken = default)
     {
         if (_memoServerProductVersion != null)
             return _memoServerProductVersion;
@@ -384,7 +389,7 @@ public sealed class SqlDbClient : DbClient
         return _memoServerProductVersion;
     }
 
-    private async Task<OneOf<string, Err[]>> GetServerInstanceName(CancellationToken cancellationToken = default)
+    private async ValueTask<OneOf<string, Err[]>> GetServerInstanceName(CancellationToken cancellationToken = default)
     {
         if (_memoServerInstanceName != null)
             return _memoServerInstanceName;
@@ -419,7 +424,7 @@ public sealed class SqlDbClient : DbClient
                                  """;
             var dbNames = new List<DatabaseInfoModel>();
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
+            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             while (reader.Read())
                 dbNames.Add(new DatabaseInfoModel(reader.GetString(1),
                     (EDatabaseRecovery)reader.GetByte(2),
@@ -450,7 +455,7 @@ public sealed class SqlDbClient : DbClient
             if (databaseName is not null)
                 dbm.AddParameter("@database", databaseName);
             dbm.Open();
-            return await dbm.ExecuteScalarAsync<int>(query, cancellationToken) == 1;
+            return await dbm.ExecuteScalarAsync(query, 0, CommandType.Text, cancellationToken) == 1;
         }
         catch (Exception ex)
         {
@@ -462,7 +467,8 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-    public override async Task<OneOf<bool, Err[]>> IsServerAllowsCompression(CancellationToken cancellationToken = default)
+    public override async Task<OneOf<bool, Err[]>> IsServerAllowsCompression(
+        CancellationToken cancellationToken = default)
     {
         const string query = """
                              SELECT count(value)
@@ -505,7 +511,7 @@ public sealed class SqlDbClient : DbClient
             const string query = "exec sp_stored_procedures";
 
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
+            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             var storedProcedures = new List<Tuple<string, string>>();
             while (reader.Read())
                 storedProcedures.Add(new Tuple<string, string>(reader.GetString(1), reader.GetString(2)));
@@ -536,7 +542,7 @@ public sealed class SqlDbClient : DbClient
             dbm.Open();
             const string query = "SELECT name FROM sys.triggers WHERE type = 'TR'";
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
+            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             while (reader.Read())
                 triggers.Add(reader.GetString(0));
         }
@@ -577,7 +583,7 @@ public sealed class SqlDbClient : DbClient
                                  """;
 
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, cancellationToken);
+            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             var tableNames = new List<string>();
             while (reader.Read())
                 tableNames.Add(reader.GetString(0));
@@ -593,18 +599,17 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-    private async Task<Option<Err[]>> RecompileDatabaseObject(string strObjectName, CancellationToken cancellationToken = default)
-    {
-        return await ExecuteCommand($"EXEC sp_recompile [{strObjectName}]", true, false, cancellationToken);
-    }
-
-    private async Task<Option<Err[]>> UpdateStatisticsForOneTable(string strTableName,
+    private Task<Option<Err[]>> RecompileDatabaseObject(string strObjectName,
         CancellationToken cancellationToken = default)
     {
-        return await ExecuteCommand($"UPDATE STATISTICS [{strTableName}] WITH FULLSCAN", true, false,
-            cancellationToken);
+        return ExecuteCommand($"EXEC sp_recompile [{strObjectName}]", true, false, cancellationToken);
     }
 
+    private Task<Option<Err[]>> UpdateStatisticsForOneTable(string strTableName,
+        CancellationToken cancellationToken = default)
+    {
+        return ExecuteCommand($"UPDATE STATISTICS [{strTableName}] WITH FULLSCAN", true, false, cancellationToken);
+    }
 
     public override async Task<Option<Err[]>> RecompileProcedures(string databaseName,
         CancellationToken cancellationToken = default)
@@ -679,7 +684,8 @@ public sealed class SqlDbClient : DbClient
     }
 
 
-    public override async Task<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken = default)
+    public override async Task<Option<Err[]>> UpdateStatistics(string databaseName,
+        CancellationToken cancellationToken = default)
     {
         var serverName = await ServerName(cancellationToken);
 

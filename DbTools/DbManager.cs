@@ -133,9 +133,8 @@ public sealed class DbManager : IDisposable
         return defaultValue;
     }
 
-    public async Task<T?> ExecuteScalarAsync<T>(string commandText, CancellationToken cancellationToken,
-        T? defaultValue = default,
-        CommandType commandType = CommandType.Text)
+    public async Task<T?> ExecuteScalarAsync<T>(string commandText, T? defaultValue = default,
+        CommandType commandType = CommandType.Text, CancellationToken cancellationToken = default)
     {
         PrepareCommand(commandText, commandType);
         var retVal = await ExecuteScalarAsync(cancellationToken);
@@ -150,7 +149,7 @@ public sealed class DbManager : IDisposable
         return _dbCommand?.ExecuteScalar();
     }
 
-    private async Task<object?> ExecuteScalarAsync(CancellationToken cancellationToken = default)
+    private async ValueTask<object?> ExecuteScalarAsync(CancellationToken cancellationToken = default)
     {
         if (_dbCommand is null)
             return null;
@@ -176,8 +175,8 @@ public sealed class DbManager : IDisposable
         _dbCommand.Parameters.Clear();
     }
 
-    public async Task<int> ExecuteNonQueryAsync(string commandText, CancellationToken cancellationToken,
-        CommandType commandType = CommandType.Text)
+    public async Task<int> ExecuteNonQueryAsync(string commandText, CommandType commandType = CommandType.Text,
+        CancellationToken cancellationToken = default)
     {
         PrepareCommand(commandText, commandType);
         var retVal = await ExecuteNonQueryAsync(cancellationToken);
@@ -191,7 +190,7 @@ public sealed class DbManager : IDisposable
         return _dbCommand?.ExecuteNonQuery() ?? 0;
     }
 
-    private async Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken = default)
+    private async ValueTask<int> ExecuteNonQueryAsync(CancellationToken cancellationToken = default)
     {
         if (_dbCommand is null)
             return 0;
@@ -209,8 +208,8 @@ public sealed class DbManager : IDisposable
     }
 
     //ჩანაწერების წამკითხველის გაშვება მითითებული ტიპის მითითებული ბრძანებისათვის
-    public async Task<IDataReader> ExecuteReaderAsync(string commandText, CancellationToken cancellationToken,
-        CommandType commandType = CommandType.Text)
+    public async Task<IDataReader> ExecuteReaderAsync(string commandText, CommandType commandType = CommandType.Text,
+        CancellationToken cancellationToken = default)
     {
         PrepareCommand(commandText, commandType);
         _dataReader = await ExecuteReaderAsync(cancellationToken);
@@ -218,7 +217,7 @@ public sealed class DbManager : IDisposable
         return _dataReader;
     }
 
-    private async Task<IDataReader> ExecuteReaderAsync(CancellationToken cancellationToken = default)
+    private async ValueTask<IDataReader> ExecuteReaderAsync(CancellationToken cancellationToken = default)
     {
         if (_dbCommand is null)
             throw new InvalidOperationException();

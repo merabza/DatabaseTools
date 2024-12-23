@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,7 +51,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         try
         {
             dbm.Open();
-            await dbm.ExecuteNonQueryAsync(strCommand, cancellationToken);
+            await dbm.ExecuteNonQueryAsync(strCommand, CommandType.Text, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -69,7 +70,8 @@ public /*open*/ abstract class DbClient : MessageLogger
     }
 
 
-    protected async Task<OneOf<T, Err[]>> ExecuteScalarAsync<T>(string queryString, CancellationToken cancellationToken = default)
+    protected async Task<OneOf<T, Err[]>> ExecuteScalarAsync<T>(string queryString,
+        CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
         using var dbm = GetDbManager();
@@ -80,7 +82,8 @@ public /*open*/ abstract class DbClient : MessageLogger
         try
         {
             dbm.Open();
-            var executeScalarAsyncResult = await dbm.ExecuteScalarAsync<T>(queryString, cancellationToken);
+            var executeScalarAsyncResult =
+                await dbm.ExecuteScalarAsync<T>(queryString, default, CommandType.Text, cancellationToken);
             if (executeScalarAsyncResult is null)
                 return new[] { DbClientErrors.ExecuteScalarAsyncResultIsNull() };
             return executeScalarAsyncResult;
@@ -107,7 +110,8 @@ public /*open*/ abstract class DbClient : MessageLogger
         List<RestoreFileModel>? files, string dataFolderName, string dataLogFolderName, string dirSeparator,
         CancellationToken cancellationToken = default);
 
-    public abstract Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken = default);
+    public abstract Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName,
+        CancellationToken cancellationToken = default);
 
     public abstract Task<OneOf<List<RestoreFileModel>, Err[]>> GetRestoreFiles(string backupFileFullName,
         CancellationToken cancellationToken = default);
@@ -115,13 +119,24 @@ public /*open*/ abstract class DbClient : MessageLogger
     public abstract Task<OneOf<bool, Err[]>> IsServerAllowsCompression(CancellationToken cancellationToken = default);
 
     //withDatabase იყო True
-    public abstract Task<Option<Err[]>> TestConnection(bool withDatabase, CancellationToken cancellationToken = default);
+    public abstract Task<Option<Err[]>>
+        TestConnection(bool withDatabase, CancellationToken cancellationToken = default);
+
     public abstract Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken = default);
-    public abstract Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseInfos(CancellationToken cancellationToken = default);
+
+    public abstract Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseInfos(
+        CancellationToken cancellationToken = default);
+
     public abstract Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken = default);
-    public abstract Task<Option<Err[]>> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken = default);
-    public abstract Task<Option<Err[]>> RecompileProcedures(string databaseName, CancellationToken cancellationToken = default);
-    public abstract Task<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken = default);
+
+    public abstract Task<Option<Err[]>> CheckRepairDatabase(string databaseName,
+        CancellationToken cancellationToken = default);
+
+    public abstract Task<Option<Err[]>> RecompileProcedures(string databaseName,
+        CancellationToken cancellationToken = default);
+
+    public abstract Task<Option<Err[]>> UpdateStatistics(string databaseName,
+        CancellationToken cancellationToken = default);
 
     public abstract Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
         string defLogFolder, CancellationToken cancellationToken = default);
