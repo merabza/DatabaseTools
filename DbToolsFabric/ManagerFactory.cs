@@ -3,6 +3,7 @@ using System.Data.Common;
 using DbTools;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
+using OleDbTools;
 using SqLiteDbTools;
 using SqlServerDbTools;
 
@@ -29,6 +30,7 @@ public static class ManagerFactory
         {
             EDataProvider.Sql => new SqlKit(),
             EDataProvider.SqLite => new SqLiteDbKit(),
+            EDataProvider.OleDb => new OleDbKit(),
             _ => throw new Exception("Unknown DataProvider")
         };
     }
