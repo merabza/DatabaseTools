@@ -38,6 +38,7 @@ public static class DbClientFabric
 
                 return new SqlDbClient(logger, conStrBuilder, dbKit, useConsole, messagesDataManager, userName);
             case EDataProvider.None:
+                return null;
             case EDataProvider.SqLite:
                 //სერვერთან კავშირის შექმნა შეიძლება მხოლოდ იმ შემთხვევაში,
                 //თუ მონაცემთა ბაზის ფაილის სახელი ცნობილია
