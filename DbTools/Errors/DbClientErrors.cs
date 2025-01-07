@@ -7,6 +7,18 @@ public static class DbClientErrors
     public static readonly Err CannotCreateDatabaseConnection = new()
         { ErrorCode = nameof(CannotCreateDatabaseConnection), ErrorMessage = "Cannot create Database connection" };
 
+    public static readonly Err NoBackupFolder = new()
+        { ErrorCode = nameof(NoRestoreFileNames), ErrorMessage = "No information about Backup folder" };
+
+    public static readonly Err NoRestoreFrom = new()
+        { ErrorCode = nameof(NoRestoreFileNames), ErrorMessage = "No information about from folder to restore" };
+
+    public static readonly Err NoDataFolder = new()
+        { ErrorCode = nameof(NoRestoreFileNames), ErrorMessage = "No information about data folder to restore" };
+
+    public static readonly Err NoDataLogFolder = new()
+        { ErrorCode = nameof(NoRestoreFileNames), ErrorMessage = "No information about data log folder to restore" };
+
     public static readonly Err NoRestoreFileNames = new()
         { ErrorCode = nameof(NoRestoreFileNames), ErrorMessage = "No information about restore file logical parts" };
 
