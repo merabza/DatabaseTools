@@ -15,8 +15,8 @@ namespace SqlServerDbTools;
 public class OleDbClient : DbClient
 {
     // ReSharper disable once ConvertToPrimaryConstructor
-    public OleDbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole) :
-        base(logger, conStrBuilder, dbKit, useConsole)
+    public OleDbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole) : base(
+        logger, conStrBuilder, dbKit, useConsole)
     {
     }
 

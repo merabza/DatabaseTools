@@ -36,8 +36,8 @@ public sealed class SqlDbClient : DbClient
         _logger = logger;
     }
 
-    public override Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename,
-        string backupName, EBackupType backupType, bool compression, CancellationToken cancellationToken = default)
+    public override Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename, string backupName,
+        EBackupType backupType, bool compression, CancellationToken cancellationToken = default)
     {
         var buTypeWord = "DATABASE";
         if (backupType == EBackupType.TrLog)
@@ -65,21 +65,20 @@ public sealed class SqlDbClient : DbClient
     public override Task<Option<Err[]>> VerifyBackup(string databaseName, string backupFilename,
         CancellationToken cancellationToken = default)
     {
-        return ExecuteCommand(
-            $"""
-             DECLARE @backupSetId as int
-             SELECT @backupSetId = position
-             FROM msdb..backupset
-             WHERE database_name=N'{databaseName}' and backup_set_id=(
-               SELECT max(backup_set_id)
-               FROM msdb..backupset
-               WHERE database_name=N'{databaseName}' )
-             IF @backupSetId is null
-              BEGIN
-               RAISERROR(N'Verify failed. Backup information for database ''{databaseName}'' not found.', 16, 1)
-              END
-             RESTORE VERIFYONLY FROM DISK = N'{backupFilename}' WITH  FILE = @backupSetId, NOUNLOAD, NOREWIND
-             """, false, false, cancellationToken);
+        return ExecuteCommand($"""
+                               DECLARE @backupSetId as int
+                               SELECT @backupSetId = position
+                               FROM msdb..backupset
+                               WHERE database_name=N'{databaseName}' and backup_set_id=(
+                                 SELECT max(backup_set_id)
+                                 FROM msdb..backupset
+                                 WHERE database_name=N'{databaseName}' )
+                               IF @backupSetId is null
+                                BEGIN
+                                 RAISERROR(N'Verify failed. Backup information for database ''{databaseName}'' not found.', 16, 1)
+                                END
+                               RESTORE VERIFYONLY FROM DISK = N'{backupFilename}' WITH  FILE = @backupSetId, NOUNLOAD, NOREWIND
+                               """, false, false, cancellationToken);
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
     }
 
@@ -107,8 +106,7 @@ public sealed class SqlDbClient : DbClient
             using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             var fileNames = new List<RestoreFileModel>();
             while (reader.Read())
-                fileNames.Add(new RestoreFileModel((string)reader["LogicalName"],
-                    (string)reader["Type"]));
+                fileNames.Add(new RestoreFileModel((string)reader["LogicalName"], (string)reader["Type"]));
 
             return fileNames;
         }
@@ -426,8 +424,7 @@ public sealed class SqlDbClient : DbClient
             // ReSharper disable once using
             using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             while (reader.Read())
-                dbNames.Add(new DatabaseInfoModel(reader.GetString(1),
-                    (EDatabaseRecovery)reader.GetByte(2),
+                dbNames.Add(new DatabaseInfoModel(reader.GetString(1), (EDatabaseRecovery)reader.GetByte(2),
                     reader.GetInt32(3) != 0));
             return dbNames;
         }
@@ -467,8 +464,7 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-    public override Task<OneOf<bool, Err[]>> IsServerAllowsCompression(
-        CancellationToken cancellationToken = default)
+    public override Task<OneOf<bool, Err[]>> IsServerAllowsCompression(CancellationToken cancellationToken = default)
     {
         const string query = """
                              SELECT count(value)
@@ -614,8 +610,8 @@ public sealed class SqlDbClient : DbClient
     public override async Task<Option<Err[]>> RecompileProcedures(string databaseName,
         CancellationToken cancellationToken = default)
     {
-        await LogInfoAndSendMessage("Recompiling Tables, views and triggers for database {0}...",
-            databaseName, cancellationToken);
+        await LogInfoAndSendMessage("Recompiling Tables, views and triggers for database {0}...", databaseName,
+            cancellationToken);
 
         if (cancellationToken.IsCancellationRequested)
             return new[] { DbToolsErrors.CancellationRequested(nameof(RecompileProcedures)) };
