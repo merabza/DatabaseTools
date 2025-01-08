@@ -91,6 +91,11 @@ public class SqLiteDbClient : DbClient
         throw new NotImplementedException();
     }
 
+    //public override Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Err[]>> GetDatabaseFoldersSets(CancellationToken cancellationToken = default)
+    //{
+    //    throw new NotImplementedException();
+    //}
+
     public override Task<Option<Err[]>> TestConnection(bool withDatabase, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
