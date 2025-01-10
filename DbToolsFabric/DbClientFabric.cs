@@ -1,6 +1,7 @@
 ﻿using System.Data.OleDb;
 using DbTools;
 using DbTools.Models;
+using LibDatabaseParameters;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
@@ -11,7 +12,7 @@ namespace DbToolsFabric;
 
 public static class DbClientFabric
 {
-    public static DbClient? GetDbClient(ILogger logger, bool useConsole, EDataProvider dataProvider,
+    public static DbClient? GetDbClient(ILogger logger, bool useConsole, EDatabaseProvider dataProvider,
         string serverAddress, DbAuthSettingsBase dbAuthSettingsBase, bool trustServerCertificate,
         string? applicationName, string? databaseName = null, IMessagesDataManager? messagesDataManager = null,
         string? userName = null)
@@ -19,7 +20,7 @@ public static class DbClientFabric
         var dbKit = ManagerFactory.GetKit(dataProvider);
         switch (dataProvider)
         {
-            case EDataProvider.Sql:
+            case EDatabaseProvider.SqlServer:
                 var conStrBuilder = dbAuthSettingsBase is not DbAuthSettings dbAuthSettings
                     ? new SqlConnectionStringBuilder { IntegratedSecurity = true }
                     : new SqlConnectionStringBuilder
@@ -37,9 +38,9 @@ public static class DbClientFabric
                     conStrBuilder.InitialCatalog = databaseName;
 
                 return new SqlDbClient(logger, conStrBuilder, dbKit, useConsole, messagesDataManager, userName);
-            case EDataProvider.None:
+            case EDatabaseProvider.None:
                 return null;
-            case EDataProvider.SqLite:
+            case EDatabaseProvider.SqLite:
                 //სერვერთან კავშირის შექმნა შეიძლება მხოლოდ იმ შემთხვევაში,
                 //თუ მონაცემთა ბაზის ფაილის სახელი ცნობილია
                 //ასხვანაირად კავშირის შექმნა შეუძლებელია აქსესის ბაზისთვის
@@ -53,7 +54,7 @@ public static class DbClientFabric
                         : sqliteDbAuthSettings.ServerPass
                 };
                 return new SqLiteDbClient(logger, sqliteConStrBuilder, dbKit, useConsole);
-            case EDataProvider.OleDb:
+            case EDatabaseProvider.OleDb:
                 //სერვერთან კავშირის შექმნა შეიძლება მხოლოდ იმ შემთხვევაში,
                 //თუ პროგრამა გაშვებულია ვინდოუსზე და თუ მონაცემთა ბაზის ფაილის სახელი ცნობილია
                 //ასხვანაირად კავშირის შექმნა შეუძლებელია აქსესის ბაზისთვის

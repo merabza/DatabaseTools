@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.Common;
 using DbTools;
+using LibDatabaseParameters;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using OleDbTools;
@@ -20,17 +21,17 @@ public static class ManagerFactory
 
     public static DbKit? GetKit(string providerName)
     {
-        return Enum.TryParse(providerName, out EDataProvider providerType) ? GetKit(providerType) : null;
+        return Enum.TryParse(providerName, out EDatabaseProvider provider) ? GetKit(provider) : null;
     }
 
 
-    public static DbKit GetKit(EDataProvider providerType)
+    public static DbKit GetKit(EDatabaseProvider provider)
     {
-        return providerType switch
+        return provider switch
         {
-            EDataProvider.Sql => new SqlKit(),
-            EDataProvider.SqLite => new SqLiteDbKit(),
-            EDataProvider.OleDb => new OleDbKit(),
+            EDatabaseProvider.SqlServer => new SqlKit(),
+            EDatabaseProvider.SqLite => new SqLiteDbKit(),
+            EDatabaseProvider.OleDb => new OleDbKit(),
             _ => throw new Exception("Unknown DataProvider")
         };
     }

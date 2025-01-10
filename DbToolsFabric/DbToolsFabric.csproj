@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\ParametersManagement\LibDatabaseParameters\LibDatabaseParameters.csproj" />
         <ProjectReference Include="..\DbTools\DbTools.csproj" />
         <ProjectReference Include="..\OleDbTools\OleDbTools.csproj" />
         <ProjectReference Include="..\SqLiteDbTools\SqLiteDbTools.csproj" />
