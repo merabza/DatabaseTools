@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading;
 
 namespace SqlServerDbTools;
 
 public sealed class SqlConverters
 {
     private static SqlConverters? _pInstance;
-    private static readonly object SyncRoot = new();
-    private readonly Dictionary<SqlDbType, DbType> _sqlDbtypeToDbTypeMap;
+    private static readonly Lock SyncRoot = new();
+    private readonly Dictionary<SqlDbType, DbType> _sqlDbTypeToDbTypeMap;
 
     private readonly Dictionary<SqlDbType, Type> _sqlDbTypeToTypeMap;
     private readonly Dictionary<Type, SqlDbType> _typeToSqlDbTypeMap;
@@ -17,7 +18,7 @@ public sealed class SqlConverters
     {
         _sqlDbTypeToTypeMap = PrepareSqlDbTypeToTypeMapConverter();
         _typeToSqlDbTypeMap = PrepareTypeToSqlDbTypeMapConverter();
-        _sqlDbtypeToDbTypeMap = PrepareSqlDbTypeToDbTypeMapConverter();
+        _sqlDbTypeToDbTypeMap = PrepareSqlDbTypeToDbTypeMapConverter();
     }
 
     public static SqlConverters Instance
@@ -37,7 +38,7 @@ public sealed class SqlConverters
 
     public DbType GetDbTypeFromSqlDbType(SqlDbType sqlDbType)
     {
-        return _sqlDbtypeToDbTypeMap[sqlDbType];
+        return _sqlDbTypeToDbTypeMap[sqlDbType];
     }
 
     public SqlDbType GetSqlDbTypeFromType(Type type)
@@ -50,7 +51,7 @@ public sealed class SqlConverters
         return _sqlDbTypeToTypeMap[sqlDbType];
     }
 
-    public SqlDbType GetSqlDbTypeBySqlDbTypeName(string sqlDbTypeName)
+    private static SqlDbType GetSqlDbTypeBySqlDbTypeName(string sqlDbTypeName)
     {
         return Enum.TryParse(sqlDbTypeName, true, out SqlDbType toRet) ? toRet : SqlDbType.Variant;
     }

@@ -8,17 +8,15 @@ using DbTools.Models;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using OneOf;
-using SystemToolsShared;
 using SystemToolsShared.Errors;
 
-namespace SqlServerDbTools;
+namespace OleDbTools;
 
-public class SqLiteDbClient : DbClient
+public class OleDbClient : DbClient
 {
     // ReSharper disable once ConvertToPrimaryConstructor
-    public SqLiteDbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,
-        IMessagesDataManager? messagesDataManager = null, string? userName = null) : base(logger, conStrBuilder, dbKit,
-        useConsole, messagesDataManager, userName)
+    public OleDbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole) : base(
+        logger, conStrBuilder, dbKit, useConsole)
     {
     }
 

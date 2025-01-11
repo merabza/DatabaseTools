@@ -5,6 +5,8 @@ using LibDatabaseParameters;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
+using OleDbTools;
+using SqLiteDbTools;
 using SqlServerDbTools;
 using SystemToolsShared;
 
@@ -67,6 +69,7 @@ public static class DbClientFabric
                 };
                 return new OleDbClient(logger, msAccessConStrBuilder, dbKit, useConsole);
 #pragma warning restore CA1416
+            case EDatabaseProvider.WebAgent:
             default:
                 return null;
         }
