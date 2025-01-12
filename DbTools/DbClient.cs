@@ -140,5 +140,4 @@ public /*open*/ abstract class DbClient : MessageLogger
 
     public abstract Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
         string defLogFolder, CancellationToken cancellationToken = default);
-
 }
