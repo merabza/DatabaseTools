@@ -1,7 +1,7 @@
-﻿using DbTools;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
+using DbTools;
 
 namespace OleDbTools;
 
@@ -44,5 +44,4 @@ public sealed class OleDbKit : DbKit
         return new OleDbDataAdapter();
     }
 #pragma warning restore CA1416
-
 }

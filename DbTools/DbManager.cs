@@ -96,8 +96,7 @@ public sealed class DbManager : IDisposable
             var p = _kit.GetParameter(param);
             if (p is null)
                 continue;
-            if (param.Direction is ParameterDirection.InputOutput or ParameterDirection.Input &&
-                param.Value == null)
+            if (param.Direction is ParameterDirection.InputOutput or ParameterDirection.Input && param.Value == null)
                 p.Value = DBNull.Value;
             _dbCommand.Parameters.Add(p);
         }

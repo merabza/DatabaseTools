@@ -1,8 +1,8 @@
-﻿using DbTools;
-using Microsoft.Data.Sqlite;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 using System.Data.SQLite;
+using DbTools;
+using Microsoft.Data.Sqlite;
 
 namespace SqLiteDbTools;
 

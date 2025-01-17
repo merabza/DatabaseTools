@@ -13,5 +13,4 @@ public class DatabaseFoldersSet : ItemData
     {
         return $"{Backup} {Data} {DataLog}";
     }
-
 }

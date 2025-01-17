@@ -1,7 +1,7 @@
-﻿using DbTools;
-using Microsoft.Data.SqlClient;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
+using DbTools;
+using Microsoft.Data.SqlClient;
 
 namespace SqlServerDbTools;
 
@@ -15,8 +15,7 @@ public sealed class SqlKit : DbKit
     public override DbConnection GetConnection(bool fireInfoMessageEventOnUserErrors = false)
     {
         // ReSharper disable once using
-        var sqlConnection = new SqlConnection
-        { FireInfoMessageEventOnUserErrors = fireInfoMessageEventOnUserErrors };
+        var sqlConnection = new SqlConnection { FireInfoMessageEventOnUserErrors = fireInfoMessageEventOnUserErrors };
         if (fireInfoMessageEventOnUserErrors)
             sqlConnection.InfoMessage += sqlConnection_InfoMessage;
         return sqlConnection;

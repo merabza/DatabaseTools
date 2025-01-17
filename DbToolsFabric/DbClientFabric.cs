@@ -1,4 +1,5 @@
-﻿using DbTools;
+﻿using System.Data.OleDb;
+using DbTools;
 using DbTools.Models;
 using LibDatabaseParameters;
 using Microsoft.Data.SqlClient;
@@ -7,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using OleDbTools;
 using SqLiteDbTools;
 using SqlServerDbTools;
-using System.Data.OleDb;
 using SystemToolsShared;
 
 namespace DbToolsFabric;
@@ -65,9 +65,7 @@ public static class DbClientFabric
 #pragma warning disable CA1416
                 var msAccessConStrBuilder = new OleDbConnectionStringBuilder
                 {
-                    DataSource = databaseName,
-                    Provider = "Microsoft.ACE.OLEDB.12.0",
-                    PersistSecurityInfo = false
+                    DataSource = databaseName, Provider = "Microsoft.ACE.OLEDB.12.0", PersistSecurityInfo = false
                 };
                 return new OleDbClient(logger, msAccessConStrBuilder, dbKit, useConsole);
 #pragma warning restore CA1416
