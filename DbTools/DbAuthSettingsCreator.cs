@@ -1,28 +1,38 @@
-﻿using DbTools.Models;
+﻿using System.Collections.Generic;
+using DbTools.Errors;
+using DbTools.Models;
+using OneOf;
 using SystemToolsShared;
+using SystemToolsShared.Errors;
 
 namespace DbTools;
 
 public static class DbAuthSettingsCreator
 {
-    public static DbAuthSettingsBase? Create(bool windowsNtIntegratedSecurity, string? serverUser, string? serverPass)
+    public static OneOf<DbAuthSettingsBase, IEnumerable<Err>> Create(bool windowsNtIntegratedSecurity,
+        string? serverUser, string? serverPass, bool useConsole)
     {
-        if (!windowsNtIntegratedSecurity && !string.IsNullOrWhiteSpace(serverUser) &&
-            !string.IsNullOrWhiteSpace(serverPass))
-            return new DbAuthSettings(serverUser, serverPass);
-
-        if (windowsNtIntegratedSecurity)
+        switch (windowsNtIntegratedSecurity)
         {
-            if (!string.IsNullOrWhiteSpace(serverUser) || !string.IsNullOrWhiteSpace(serverPass))
-                StShared.WriteWarningLine(
-                    "windowsNtIntegratedSecurity is on and serverUser is specified or serverPass is specified. both will be ignored.",
-                    true);
-            return new DbAuthSettingsBase();
+            case false when !string.IsNullOrWhiteSpace(serverUser) && !string.IsNullOrWhiteSpace(serverPass):
+                return new DbAuthSettings(serverUser, serverPass);
+            case true:
+            {
+                if (!string.IsNullOrWhiteSpace(serverUser) || !string.IsNullOrWhiteSpace(serverPass))
+                    StShared.WriteWarningLine(
+                        "windowsNtIntegratedSecurity is on and serverUser is specified or serverPass is specified. both will be ignored.",
+                        useConsole);
+                return new DbAuthSettingsBase();
+            }
+            default:
+                StShared.WriteErrorLine(
+                    "windowsNtIntegratedSecurity is off and serverUser does not specified or serverPass does not specified",
+                    useConsole);
+                return new[]
+                {
+                    DbToolsErrors
+                        .WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified
+                };
         }
-
-        StShared.WriteErrorLine(
-            "windowsNtIntegratedSecurity is off and serverUser does not specified or serverPass does not specified",
-            true);
-        return null;
     }
 }
