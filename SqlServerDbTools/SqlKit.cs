@@ -1,7 +1,7 @@
-﻿using System.Data;
-using System.Data.Common;
-using DbTools;
+﻿using DbTools;
 using Microsoft.Data.SqlClient;
+using System.Data;
+using System.Data.Common;
 
 namespace SqlServerDbTools;
 
@@ -16,7 +16,7 @@ public sealed class SqlKit : DbKit
     {
         // ReSharper disable once using
         var sqlConnection = new SqlConnection
-            { FireInfoMessageEventOnUserErrors = fireInfoMessageEventOnUserErrors };
+        { FireInfoMessageEventOnUserErrors = fireInfoMessageEventOnUserErrors };
         if (fireInfoMessageEventOnUserErrors)
             sqlConnection.InfoMessage += sqlConnection_InfoMessage;
         return sqlConnection;
