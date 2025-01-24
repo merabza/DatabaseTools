@@ -95,7 +95,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         try
@@ -112,7 +112,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(GetRestoreFiles), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetRestoreFiles), cancellationToken);
         }
         finally
         {
@@ -125,15 +125,15 @@ public sealed class SqlDbClient : DbClient
         CancellationToken cancellationToken = default)
     {
         if (files == null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.NoRestoreFileNames, cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.NoRestoreFileNames, cancellationToken);
 
         var dataPart = files.SingleOrDefault(s => s.Type == "D");
         if (dataPart == null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.NoDataPart, cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.NoDataPart, cancellationToken);
 
         var logPart = files.SingleOrDefault(s => s.Type == "L");
         if (logPart == null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.NoLogPart, cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.NoLogPart, cancellationToken);
 
         var dataPartFileFullName = $"{dataFolderName.AddNeedLastPart(dirSeparator)}{databaseName}.mdf";
         var dataLogPartFileFullName = $"{dataLogFolderName.AddNeedLastPart(dirSeparator)}{databaseName}_log.ldf";
@@ -153,11 +153,11 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         if (dbm.ConnectionString == string.Empty)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.ConnectionServerDoesNotSpecified,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.ConnectionServerDoesNotSpecified,
                 CancellationToken.None);
 
         try
@@ -165,7 +165,7 @@ public sealed class SqlDbClient : DbClient
             dbm.Open();
             dbm.Close();
             if (dbm.Database == string.Empty && withDatabase)
-                return await LogErrorAndSendMessageFromError(DbClientErrors.DatabaseNameIsNotSpecified,
+                return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.DatabaseNameIsNotSpecified,
                     CancellationToken.None);
 
             _logger.LogInformation("Test Connection Succeeded");
@@ -195,7 +195,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         try
@@ -226,7 +226,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(RegWrite), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(RegWrite), cancellationToken);
         }
         finally
         {
@@ -246,7 +246,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         try
@@ -264,7 +264,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(RegRead), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(RegRead), cancellationToken);
         }
         finally
         {
@@ -350,7 +350,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         try
@@ -366,7 +366,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(GetServerString), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetServerString), cancellationToken);
         }
         finally
         {
@@ -409,7 +409,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         try
@@ -432,7 +432,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(GetDatabaseInfos), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetDatabaseInfos), cancellationToken);
         }
         finally
         {
@@ -446,7 +446,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         try
@@ -458,7 +458,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(GetServerIntBool), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetServerIntBool), cancellationToken);
         }
         finally
         {
@@ -502,7 +502,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         try
@@ -519,7 +519,8 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(GetStoredProcedureNames), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetStoredProcedureNames),
+                cancellationToken);
         }
         finally
         {
@@ -535,7 +536,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         try
@@ -549,7 +550,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(GetTriggerNames), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetTriggerNames), cancellationToken);
         }
         finally
         {
@@ -565,7 +566,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         try
@@ -593,7 +594,8 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(GetDatabaseTableNames), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetDatabaseTableNames),
+                cancellationToken);
         }
         finally
         {
@@ -718,7 +720,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(UpdateStatistics), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(UpdateStatistics), cancellationToken);
         }
 
         return null;

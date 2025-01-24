@@ -41,7 +41,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         if (bLogStart)
@@ -55,7 +55,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(ExecuteCommand), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(ExecuteCommand), cancellationToken);
         }
         finally
         {
@@ -76,7 +76,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 CancellationToken.None);
 
         try
@@ -90,7 +90,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
         catch (Exception ex)
         {
-            return await LogErrorAndSendMessageFromException(ex, nameof(ExecuteScalarAsync), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(ExecuteScalarAsync), cancellationToken);
         }
         finally
         {
