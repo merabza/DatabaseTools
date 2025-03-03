@@ -91,6 +91,12 @@ public class OleDbClient : DbClient
         throw new NotImplementedException();
     }
 
+    public override Task<Option<IEnumerable<Err>>> ChangeDatabaseRecoveryModel(string databaseName,
+        EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<Option<IEnumerable<Err>>>(null);
+    }
+
     //public override Task<OneOf<Dictionary<string, DatabaseFoldersSet>, IEnumerable<Err>>> GetDatabaseFoldersSets(CancellationToken cancellationToken = default)
     //{
     //    throw new NotImplementedException();

@@ -3,7 +3,7 @@
 public sealed class DatabaseInfoModel
 {
     // ReSharper disable once ConvertToPrimaryConstructor
-    public DatabaseInfoModel(string name, EDatabaseRecovery recoveryModel, bool isSystemDatabase)
+    public DatabaseInfoModel(string name, EDatabaseRecoveryModel recoveryModel, bool isSystemDatabase)
     {
         Name = name;
         RecoveryModel = recoveryModel;
@@ -11,6 +11,6 @@ public sealed class DatabaseInfoModel
     }
 
     public string Name { get; set; }
-    public EDatabaseRecovery RecoveryModel { get; set; }
+    public EDatabaseRecoveryModel RecoveryModel { get; set; }
     public bool IsSystemDatabase { get; set; }
 }

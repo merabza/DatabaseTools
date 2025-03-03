@@ -42,7 +42,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         if (bLogStart)
             await LogInfoAndSendMessage("Start - {0} For Database - {1}.{2}", strCommand, dbm.Connection.DataSource,
@@ -69,7 +69,6 @@ public /*open*/ abstract class DbClient : MessageLogger
         return null;
     }
 
-
     protected async Task<OneOf<T, IEnumerable<Err>>> ExecuteScalarAsync<T>(string queryString,
         CancellationToken cancellationToken = default)
     {
@@ -77,7 +76,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         try
         {
@@ -142,4 +141,7 @@ public /*open*/ abstract class DbClient : MessageLogger
 
     public abstract Task<Option<IEnumerable<Err>>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
         string defLogFolder, CancellationToken cancellationToken = default);
+
+    public abstract Task<Option<IEnumerable<Err>>> ChangeDatabaseRecoveryModel(string databaseName,
+        EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken);
 }

@@ -96,7 +96,7 @@ public sealed class SqlDbClient : DbClient
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         try
         {
@@ -154,11 +154,11 @@ public sealed class SqlDbClient : DbClient
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         if (dbm.ConnectionString == string.Empty)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.ConnectionServerDoesNotSpecified,
-                CancellationToken.None);
+                cancellationToken);
 
         try
         {
@@ -166,7 +166,7 @@ public sealed class SqlDbClient : DbClient
             dbm.Close();
             if (dbm.Database == string.Empty && withDatabase)
                 return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.DatabaseNameIsNotSpecified,
-                    CancellationToken.None);
+                    cancellationToken);
 
             _logger.LogInformation("Test Connection Succeeded");
             return null;
@@ -196,7 +196,7 @@ public sealed class SqlDbClient : DbClient
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         try
         {
@@ -247,7 +247,7 @@ public sealed class SqlDbClient : DbClient
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         try
         {
@@ -351,7 +351,7 @@ public sealed class SqlDbClient : DbClient
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         try
         {
@@ -410,7 +410,7 @@ public sealed class SqlDbClient : DbClient
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         try
         {
@@ -426,7 +426,7 @@ public sealed class SqlDbClient : DbClient
             // ReSharper disable once using
             using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             while (reader.Read())
-                dbNames.Add(new DatabaseInfoModel(reader.GetString(1), (EDatabaseRecovery)reader.GetByte(2),
+                dbNames.Add(new DatabaseInfoModel(reader.GetString(1), (EDatabaseRecoveryModel)reader.GetByte(2),
                     reader.GetInt32(3) != 0));
             return dbNames;
         }
@@ -447,7 +447,7 @@ public sealed class SqlDbClient : DbClient
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         try
         {
@@ -503,7 +503,7 @@ public sealed class SqlDbClient : DbClient
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         try
         {
@@ -537,7 +537,7 @@ public sealed class SqlDbClient : DbClient
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         try
         {
@@ -567,7 +567,7 @@ public sealed class SqlDbClient : DbClient
         using var dbm = GetDbManager();
         if (dbm is null)
             return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
-                CancellationToken.None);
+                cancellationToken);
 
         try
         {
@@ -754,6 +754,21 @@ public sealed class SqlDbClient : DbClient
             return (Err[])regWriteLogResult;
 
         return null;
+    }
+
+    public override Task<Option<IEnumerable<Err>>> ChangeDatabaseRecoveryModel(string databaseName,
+        EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken)
+    {
+        var recoveryModel = databaseRecoveryModel switch
+        {
+            EDatabaseRecoveryModel.Full => "FULL",
+            EDatabaseRecoveryModel.BulkLogged => "BULK_LOGGED",
+            EDatabaseRecoveryModel.Simple => "SIMPLE",
+            _ => throw new ArgumentOutOfRangeException(nameof(databaseRecoveryModel), databaseRecoveryModel, null)
+        };
+
+        return ExecuteCommand($"ALTER DATABASE [{databaseName}] SET RECOVERY {recoveryModel}", true, false,
+            cancellationToken);
     }
 
     //public override Task<OneOf<Dictionary<string, DatabaseFoldersSet>, IEnumerable<Err>>> GetDatabaseFoldersSets(CancellationToken cancellationToken = default)
