@@ -30,6 +30,20 @@ public static class DbToolsErrors
             ErrorMessage = "databaseConnectionName is not specified"
         };
 
+    public static Err DevDatabaseNameIsNotSpecified =>
+        new()
+        {
+            ErrorCode = nameof(DevDatabaseNameIsNotSpecified),
+            ErrorMessage = "dev DatabaseName is not specified"
+        };
+
+    public static Err DevDatabaseRecoveryModelIsNotSpecified =>
+        new()
+        {
+            ErrorCode = nameof(DevDatabaseRecoveryModelIsNotSpecified),
+            ErrorMessage = "dev DatabaseRecoveryModel is not specified"
+        };
+
     public static Err CreateSqLiteDatabaseManagerIsNotImplemented =>
         new()
         {
