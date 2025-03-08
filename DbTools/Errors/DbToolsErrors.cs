@@ -31,11 +31,7 @@ public static class DbToolsErrors
         };
 
     public static Err DevDatabaseNameIsNotSpecified =>
-        new()
-        {
-            ErrorCode = nameof(DevDatabaseNameIsNotSpecified),
-            ErrorMessage = "dev DatabaseName is not specified"
-        };
+        new() { ErrorCode = nameof(DevDatabaseNameIsNotSpecified), ErrorMessage = "dev DatabaseName is not specified" };
 
     public static Err DevDatabaseRecoveryModelIsNotSpecified =>
         new()
