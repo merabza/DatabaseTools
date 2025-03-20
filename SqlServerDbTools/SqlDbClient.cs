@@ -177,7 +177,6 @@ public sealed class SqlDbClient : DbClient
         }
     }
 
-
     //ამ მეთოდმა არ იმუშავა. საჭიროა სერვერის მხარეს გაეშვას ბძანებები
     //ლინუქსუს შემთხვევაში:
     //sudo /opt/mssql/bin/mssql-conf set filelocation.defaultbackupdir /tmp/backup
@@ -687,7 +686,6 @@ public sealed class SqlDbClient : DbClient
         return null;
     }
 
-
     public override async Task<Option<IEnumerable<Err>>> UpdateStatistics(string databaseName,
         CancellationToken cancellationToken = default)
     {
@@ -775,7 +773,6 @@ public sealed class SqlDbClient : DbClient
     //{
     //    throw new NotImplementedException();
     //}
-
 
     private async Task<OneOf<string, IEnumerable<Err>>> ServerName(CancellationToken cancellationToken = default)
     {

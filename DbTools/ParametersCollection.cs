@@ -32,7 +32,6 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
         return GetEnumerator();
     }
 
-
     public override string ToString()
     {
         var sb = new StringBuilder();
@@ -49,7 +48,6 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
 
         return sb.ToString();
     }
-
 
     public TC? GetParameterValue<TC>(string parameterName)
     {
@@ -69,7 +67,6 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
         return _dbParametersByNames.ContainsKey(parameterName);
     }
 
-
     public DataParameter CreateParameter<TS>(string name, TS value, bool checkDefault = false)
     {
         var p = new DataParameter(Converters.Instance.GetDbTypeFromType(typeof(TS)), name);
@@ -80,19 +77,16 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
         return p;
     }
 
-
     public DataParameter CreateParameter(string name, DbType type, int length, string sourceColumn)
     {
         var p = new DataParameter(type, name, length, sourceColumn);
         return p;
     }
 
-
     public void AddParameter<TS>(string name, TS value)
     {
         AddParameter(CreateParameter(name, value));
     }
-
 
     public void AddParameter(DataParameter parameter)
     {

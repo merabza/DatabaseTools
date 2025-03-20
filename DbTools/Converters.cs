@@ -53,7 +53,6 @@ public sealed class Converters
         return Enum.TryParse(baseTypeName, true, out DbType toRet) ? toRet : DbType.Object;
     }
 
-
     private Dictionary<DbType, Type> PrepareDbTypeToTypeConverter()
     {
         var dbTypeToTypeMap = new Dictionary<DbType, Type>

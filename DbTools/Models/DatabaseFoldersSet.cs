@@ -8,7 +8,6 @@ public class DatabaseFoldersSet : ItemData
     public string? Data { get; set; }
     public string? DataLog { get; set; }
 
-
     public string GetStatus()
     {
         return $"{Backup} {Data} {DataLog}";

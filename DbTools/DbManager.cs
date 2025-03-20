@@ -15,7 +15,6 @@ public sealed class DbManager : IDisposable
     private DbTransaction? _dbTransaction;
     private ParametersCollection? _parameters;
 
-
     private DbManager(DbKit kit, DbConnection dbConnection, string connectionString = "", int commandTimeout = 0,
         bool fireInfoMessageEventOnUserErrors = false)
     {
@@ -32,7 +31,6 @@ public sealed class DbManager : IDisposable
 
     public string ConnectionString => Connection.ConnectionString;
     public string Database => Connection.Database;
-
 
     public void Dispose()
     {
@@ -196,7 +194,6 @@ public sealed class DbManager : IDisposable
         return await _dbCommand.ExecuteNonQueryAsync(cancellationToken);
     }
 
-
     //ჩანაწერების წამკითხველის გაშვება მითითებული ტიპის მითითებული ბრძანებისათვის
     public IDataReader ExecuteReader(string commandText, CommandType commandType = CommandType.Text)
     {
@@ -223,14 +220,12 @@ public sealed class DbManager : IDisposable
         return await _dbCommand.ExecuteReaderAsync(cancellationToken);
     }
 
-
     private IDataReader ExecuteReader()
     {
         if (_dbCommand is null)
             throw new InvalidOperationException();
         return _dbCommand.ExecuteReader();
     }
-
 
     //კავშირის დახურვა თუ დახურული არ არის
     public void Close()

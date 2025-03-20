@@ -24,7 +24,6 @@ public static class ManagerFactory
         return Enum.TryParse(providerName, out EDatabaseProvider provider) ? GetKit(provider) : null;
     }
 
-
     public static DbKit GetKit(EDatabaseProvider provider)
     {
         return provider switch

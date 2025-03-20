@@ -42,7 +42,6 @@ public sealed class SqlKit : DbKit
         return dbPar;
     }
 
-
     public override IDbDataParameter GetGuidListParameter()
     {
         return new SqlParameter { SqlDbType = SqlDbType.Structured, TypeName = "uniqueidentifier_list_tbltype" };
