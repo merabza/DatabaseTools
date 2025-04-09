@@ -2,7 +2,7 @@
 
 namespace DbTools.Models;
 
-public class DatabaseFoldersSet : ItemData
+public sealed class DatabaseFoldersSet : ItemData
 {
     public string? Backup { get; set; }
     public string? Data { get; set; }

@@ -13,7 +13,7 @@ using SystemToolsShared.Errors;
 
 namespace SqLiteDbTools;
 
-public class SqLiteDbClient : DbClient
+public sealed class SqLiteDbClient : DbClient
 {
     // ReSharper disable once ConvertToPrimaryConstructor
     public SqLiteDbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,
