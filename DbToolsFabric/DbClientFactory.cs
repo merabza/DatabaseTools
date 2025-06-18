@@ -12,7 +12,7 @@ using SystemToolsShared;
 
 namespace DbToolsFabric;
 
-public static class DbClientFabric
+public static class DbClientFactory
 {
     public static DbClient? GetDbClient(ILogger logger, bool useConsole, EDatabaseProvider dataProvider,
         string serverAddress, DbAuthSettingsBase dbAuthSettingsBase, bool trustServerCertificate,
