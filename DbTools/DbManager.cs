@@ -236,7 +236,7 @@ public sealed class DbManager : IDisposable
 
     public void AddParameter<TS>(string name, TS value, bool checkDefault = false)
     {
-        AddParameter(ParamFabric.CreateParameter(name, value, checkDefault));
+        AddParameter(ParamFactory.CreateParameter(name, value, checkDefault));
     }
 
     private void AddParameter(DataParameter iDbDataParameter)

@@ -3,7 +3,7 @@ using System.Data;
 
 namespace DbTools;
 
-public static class ParamFabric
+public static class ParamFactory
 {
     public static DataParameter CreateParameter(string name)
     {
