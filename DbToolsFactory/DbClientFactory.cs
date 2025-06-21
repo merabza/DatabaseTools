@@ -10,7 +10,7 @@ using SqLiteDbTools;
 using SqlServerDbTools;
 using SystemToolsShared;
 
-namespace DbToolsFabric;
+namespace DbToolsFactory;
 
 public static class DbClientFactory
 {
@@ -19,7 +19,7 @@ public static class DbClientFactory
         string? applicationName, string? databaseName = null, IMessagesDataManager? messagesDataManager = null,
         string? userName = null)
     {
-        var dbKit = ManagerFactory.GetKit(dataProvider);
+        var dbKit = DbKitFactory.GetKit(dataProvider);
         switch (dataProvider)
         {
             case EDatabaseProvider.SqlServer:

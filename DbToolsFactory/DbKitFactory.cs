@@ -8,9 +8,9 @@ using OleDbTools;
 using SqLiteDbTools;
 using SqlServerDbTools;
 
-namespace DbToolsFabric;
+namespace DbToolsFactory;
 
-public static class ManagerFactory
+public static class DbKitFactory
 {
     internal static DbKit? GetKit(DbConnection connection)
     {
