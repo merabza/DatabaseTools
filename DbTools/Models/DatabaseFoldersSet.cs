@@ -8,7 +8,7 @@ public sealed class DatabaseFoldersSet : ItemData
     public string? Data { get; set; }
     public string? DataLog { get; set; }
 
-    public string GetStatus()
+    public override string GetItemKey()
     {
         return $"{Backup} {Data} {DataLog}";
     }
