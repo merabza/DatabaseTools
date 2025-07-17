@@ -16,9 +16,9 @@ namespace DbTools;
 
 public /*open*/ abstract class DbClient : MessageLogger
 {
-    protected readonly bool UseConsole;
     private readonly DbConnectionStringBuilder _conStrBuilder;
     private readonly DbKit _dbKit;
+    protected readonly bool UseConsole;
 
     // ReSharper disable once ConvertToPrimaryConstructor
     protected DbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,
