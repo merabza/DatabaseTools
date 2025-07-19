@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading;
 
 namespace DbTools;
 
 public sealed class Converters
 {
     private static Converters? _pInstance;
-    private static readonly object SyncRoot = new();
+    private static readonly Lock SyncRoot = new();
     private readonly Dictionary<DbType, Type> _dbTypeToTypeMap;
 
     private readonly Dictionary<Type, DbType> _typeToDbTypeMap;
@@ -48,12 +49,12 @@ public sealed class Converters
         return _dbTypeToTypeMap[dbType];
     }
 
-    public DbType GetDbTypeByTypeName(string baseTypeName)
+    public static DbType GetDbTypeByTypeName(string baseTypeName)
     {
         return Enum.TryParse(baseTypeName, true, out DbType toRet) ? toRet : DbType.Object;
     }
 
-    private Dictionary<DbType, Type> PrepareDbTypeToTypeConverter()
+    private static Dictionary<DbType, Type> PrepareDbTypeToTypeConverter()
     {
         var dbTypeToTypeMap = new Dictionary<DbType, Type>
         {
@@ -80,7 +81,7 @@ public sealed class Converters
         return dbTypeToTypeMap;
     }
 
-    private Dictionary<Type, DbType> PrepareTypeToDbTypeConverter()
+    private static Dictionary<Type, DbType> PrepareTypeToDbTypeConverter()
     {
         var typeToDbTypeMap = new Dictionary<Type, DbType>
         {
