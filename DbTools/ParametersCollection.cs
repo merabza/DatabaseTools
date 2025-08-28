@@ -39,9 +39,9 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
         foreach (var param in _dbParameters)
         {
             if (atLeastOneAdded)
-                sb.Append(";");
+                sb.Append(';');
             sb.Append(param.ParameterName);
-            sb.Append("=");
+            sb.Append('=');
             sb.Append(param.Value);
             atLeastOneAdded = true;
         }
@@ -49,17 +49,13 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
         return sb.ToString();
     }
 
-    public TC? GetParameterValue<TC>(string parameterName)
+    public Tc? GetParameterValue<Tc>(string parameterName)
     {
-        if (_dbParametersByNames.ContainsKey(parameterName))
-        {
-            if (_dbParametersByNames[parameterName].Value is not null &&
-                _dbParametersByNames[parameterName].Value != DBNull.Value)
-                return (TC?)_dbParametersByNames[parameterName].Value;
-            return default;
-        }
-
-        throw new Exception("Invalid parameter Name");
+        if (!_dbParametersByNames.TryGetValue(parameterName, out var value))
+            throw new Exception("Invalid parameter Name");
+        if (value.Value is not null && value.Value != DBNull.Value)
+            return (Tc?)value.Value;
+        return default;
     }
 
     public bool ContainsKey(string parameterName)
@@ -67,23 +63,23 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
         return _dbParametersByNames.ContainsKey(parameterName);
     }
 
-    public DataParameter CreateParameter<TS>(string name, TS value, bool checkDefault = false)
+    public static DataParameter CreateParameter<Ts>(string name, Ts value, bool checkDefault = false)
     {
-        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(typeof(TS)), name);
-        if (checkDefault && Equals(value, default(TS)))
+        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(typeof(Ts)), name);
+        if (checkDefault && Equals(value, default(Ts)))
             p.Value = DBNull.Value;
         else
             p.Value = value;
         return p;
     }
 
-    public DataParameter CreateParameter(string name, DbType type, int length, string sourceColumn)
+    public static DataParameter CreateParameter(string name, DbType type, int length, string sourceColumn)
     {
         var p = new DataParameter(type, name, length, sourceColumn);
         return p;
     }
 
-    public void AddParameter<TS>(string name, TS value)
+    public void AddParameter<Ts>(string name, Ts value)
     {
         AddParameter(CreateParameter(name, value));
     }
@@ -94,8 +90,8 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
             throw new Exception("Parameter is already exists in collection");
         _dbParameters.Add(parameter);
         var parameterName = parameter.ParameterName;
-        if (!string.IsNullOrWhiteSpace(parameterName) && !_dbParametersByNames.ContainsKey(parameter.ParameterName))
-            _dbParametersByNames.Add(parameter.ParameterName, parameter);
+        if (!string.IsNullOrWhiteSpace(parameterName))
+            _dbParametersByNames.TryAdd(parameter.ParameterName, parameter);
     }
 
     public void Clear()

@@ -220,11 +220,9 @@ public sealed class DbManager : IDisposable
         return await _dbCommand.ExecuteReaderAsync(cancellationToken);
     }
 
-    private IDataReader ExecuteReader()
+    private DbDataReader ExecuteReader()
     {
-        if (_dbCommand is null)
-            throw new InvalidOperationException();
-        return _dbCommand.ExecuteReader();
+        return _dbCommand is null ? throw new InvalidOperationException() : _dbCommand.ExecuteReader();
     }
 
     //კავშირის დახურვა თუ დახურული არ არის
@@ -234,7 +232,7 @@ public sealed class DbManager : IDisposable
             Connection.Close();
     }
 
-    public void AddParameter<TS>(string name, TS value, bool checkDefault = false)
+    public void AddParameter<Ts>(string name, Ts value, bool checkDefault = false)
     {
         AddParameter(ParamFactory.CreateParameter(name, value, checkDefault));
     }
