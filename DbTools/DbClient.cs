@@ -53,7 +53,8 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(ExecuteCommand), cancellationToken);
+            return Err.CreateArr(
+                await LogErrorAndSendMessageFromException(ex, nameof(ExecuteCommand), cancellationToken));
         }
         finally
         {
@@ -87,7 +88,8 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(ExecuteScalarAsync), cancellationToken);
+            return Err.CreateArr(
+                await LogErrorAndSendMessageFromException(ex, nameof(ExecuteScalarAsync), cancellationToken));
         }
         finally
         {

@@ -112,7 +112,8 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetRestoreFiles), cancellationToken);
+            return Err.CreateArr(
+                await LogErrorAndSendMessageFromException(ex, nameof(GetRestoreFiles), cancellationToken));
         }
         finally
         {
@@ -225,7 +226,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(RegWrite), cancellationToken);
+            return Err.CreateArr(await LogErrorAndSendMessageFromException(ex, nameof(RegWrite), cancellationToken));
         }
         finally
         {
@@ -263,7 +264,7 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(RegRead), cancellationToken);
+            return Err.CreateArr(await LogErrorAndSendMessageFromException(ex, nameof(RegRead), cancellationToken));
         }
         finally
         {
@@ -365,7 +366,8 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetServerString), cancellationToken);
+            return Err.CreateArr(
+                await LogErrorAndSendMessageFromException(ex, nameof(GetServerString), cancellationToken));
         }
         finally
         {
@@ -431,7 +433,8 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetDatabaseInfos), cancellationToken);
+            return Err.CreateArr(
+                await LogErrorAndSendMessageFromException(ex, nameof(GetDatabaseInfos), cancellationToken));
         }
         finally
         {
@@ -457,7 +460,8 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetServerIntBool), cancellationToken);
+            return Err.CreateArr(
+                await LogErrorAndSendMessageFromException(ex, nameof(GetServerIntBool), cancellationToken));
         }
         finally
         {
@@ -518,8 +522,8 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetStoredProcedureNames),
-                cancellationToken);
+            return Err.CreateArr(await LogErrorAndSendMessageFromException(ex, nameof(GetStoredProcedureNames),
+                cancellationToken));
         }
         finally
         {
@@ -549,7 +553,8 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetTriggerNames), cancellationToken);
+            return Err.CreateArr(
+                await LogErrorAndSendMessageFromException(ex, nameof(GetTriggerNames), cancellationToken));
         }
         finally
         {
@@ -593,8 +598,8 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(GetDatabaseTableNames),
-                cancellationToken);
+            return Err.CreateArr(await LogErrorAndSendMessageFromException(ex, nameof(GetDatabaseTableNames),
+                cancellationToken));
         }
         finally
         {
@@ -718,7 +723,8 @@ public sealed class SqlDbClient : DbClient
         }
         catch (Exception ex)
         {
-            return (Err[])await LogErrorAndSendMessageFromException(ex, nameof(UpdateStatistics), cancellationToken);
+            return Err.CreateArr(
+                await LogErrorAndSendMessageFromException(ex, nameof(UpdateStatistics), cancellationToken));
         }
 
         return null;
