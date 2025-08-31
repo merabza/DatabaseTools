@@ -49,12 +49,12 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
         return sb.ToString();
     }
 
-    public Tc? GetParameterValue<Tc>(string parameterName)
+    public TC? GetParameterValue<TC>(string parameterName)
     {
         if (!_dbParametersByNames.TryGetValue(parameterName, out var value))
             throw new Exception("Invalid parameter Name");
         if (value.Value is not null && value.Value != DBNull.Value)
-            return (Tc?)value.Value;
+            return (TC?)value.Value;
         return default;
     }
 
@@ -63,10 +63,10 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
         return _dbParametersByNames.ContainsKey(parameterName);
     }
 
-    public static DataParameter CreateParameter<Ts>(string name, Ts value, bool checkDefault = false)
+    private static DataParameter CreateParameter<TS>(string name, TS value, bool checkDefault = false)
     {
-        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(typeof(Ts)), name);
-        if (checkDefault && Equals(value, default(Ts)))
+        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(typeof(TS)), name);
+        if (checkDefault && Equals(value, default(TS)))
             p.Value = DBNull.Value;
         else
             p.Value = value;
@@ -79,7 +79,7 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
         return p;
     }
 
-    public void AddParameter<Ts>(string name, Ts value)
+    public void AddParameter<TS>(string name, TS value)
     {
         AddParameter(CreateParameter(name, value));
     }

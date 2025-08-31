@@ -232,7 +232,7 @@ public sealed class DbManager : IDisposable
             Connection.Close();
     }
 
-    public void AddParameter<Ts>(string name, Ts value, bool checkDefault = false)
+    public void AddParameter<TS>(string name, TS value, bool checkDefault = false)
     {
         AddParameter(ParamFactory.CreateParameter(name, value, checkDefault));
     }
