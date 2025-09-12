@@ -47,10 +47,10 @@ public static class ParamFactory
         return p;
     }
 
-    public static DataParameter CreateParameter<Ts>(string name, Ts value, bool checkDefault = false)
+    public static DataParameter CreateParameter<T>(string name, T value, bool checkDefault = false)
     {
-        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(typeof(Ts)), name);
-        if (checkDefault && Equals(value, default(Ts)))
+        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(typeof(T)), name);
+        if (checkDefault && Equals(value, default(T)))
             p.Value = DBNull.Value;
         else
             p.Value = value;
