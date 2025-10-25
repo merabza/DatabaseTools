@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using DbTools.Errors;
+﻿using DbTools.Errors;
 using DbTools.Models;
 using OneOf;
 using SystemToolsShared;
@@ -9,8 +8,8 @@ namespace DbTools;
 
 public static class DbAuthSettingsCreator
 {
-    public static OneOf<DbAuthSettingsBase, IEnumerable<Err>> Create(bool windowsNtIntegratedSecurity,
-        string? serverUser, string? serverPass, bool useConsole)
+    public static OneOf<DbAuthSettingsBase, Err[]> Create(bool windowsNtIntegratedSecurity, string? serverUser,
+        string? serverPass, bool useConsole)
     {
         switch (windowsNtIntegratedSecurity)
         {
