@@ -95,7 +95,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         try
@@ -126,15 +126,15 @@ public sealed class SqlDbClient : DbClient
         CancellationToken cancellationToken = default)
     {
         if (files == null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.NoRestoreFileNames, cancellationToken);
+            return await LogErrorAndSendMessageFromError(DbClientErrors.NoRestoreFileNames, cancellationToken);
 
         var dataPart = files.SingleOrDefault(s => s.Type == "D");
         if (dataPart == null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.NoDataPart, cancellationToken);
+            return await LogErrorAndSendMessageFromError(DbClientErrors.NoDataPart, cancellationToken);
 
         var logPart = files.SingleOrDefault(s => s.Type == "L");
         if (logPart == null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.NoLogPart, cancellationToken);
+            return await LogErrorAndSendMessageFromError(DbClientErrors.NoLogPart, cancellationToken);
 
         var dataPartFileFullName = $"{dataFolderName.AddNeedLastPart(dirSeparator)}{databaseName}.mdf";
         var dataLogPartFileFullName = $"{dataLogFolderName.AddNeedLastPart(dirSeparator)}{databaseName}_log.ldf";
@@ -154,11 +154,11 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         if (dbm.ConnectionString == string.Empty)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.ConnectionServerDoesNotSpecified,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.ConnectionServerDoesNotSpecified,
                 cancellationToken);
 
         try
@@ -166,7 +166,7 @@ public sealed class SqlDbClient : DbClient
             dbm.Open();
             dbm.Close();
             if (dbm.Database == string.Empty && withDatabase)
-                return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.DatabaseNameIsNotSpecified,
+                return await LogErrorAndSendMessageFromError(DbClientErrors.DatabaseNameIsNotSpecified,
                     cancellationToken);
 
             _logger.LogInformation("Test Connection Succeeded");
@@ -195,7 +195,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         try
@@ -246,7 +246,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         try
@@ -350,7 +350,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         try
@@ -410,7 +410,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         try
@@ -448,7 +448,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         try
@@ -505,7 +505,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         try
@@ -539,7 +539,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         try
@@ -570,7 +570,7 @@ public sealed class SqlDbClient : DbClient
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         try

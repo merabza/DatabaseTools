@@ -39,7 +39,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         if (bLogStart)
@@ -74,7 +74,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         // ReSharper disable once using
         using var dbm = GetDbManager();
         if (dbm is null)
-            return (Err[])await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
+            return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
 
         try
