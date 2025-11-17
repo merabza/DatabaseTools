@@ -97,8 +97,8 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
     }
 
-    public abstract Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename,
-        string backupName, EBackupType backupType, bool compression, CancellationToken cancellationToken = default);
+    public abstract Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename, string backupName,
+        EBackupType backupType, bool compression, CancellationToken cancellationToken = default);
 
     public abstract Task<OneOf<string, Err[]>> HostPlatform(CancellationToken cancellationToken = default);
 
@@ -115,15 +115,13 @@ public /*open*/ abstract class DbClient : MessageLogger
     public abstract Task<OneOf<List<RestoreFileModel>, Err[]>> GetRestoreFiles(string backupFileFullName,
         CancellationToken cancellationToken = default);
 
-    public abstract Task<OneOf<bool, Err[]>> IsServerAllowsCompression(
-        CancellationToken cancellationToken = default);
+    public abstract Task<OneOf<bool, Err[]>> IsServerAllowsCompression(CancellationToken cancellationToken = default);
 
     //withDatabase იყო True
     public abstract Task<Option<Err[]>> TestConnection(bool withDatabase,
         CancellationToken cancellationToken = default);
 
-    public abstract Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(
-        CancellationToken cancellationToken = default);
+    public abstract Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken = default);
 
     public abstract Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseInfos(
         CancellationToken cancellationToken = default);
