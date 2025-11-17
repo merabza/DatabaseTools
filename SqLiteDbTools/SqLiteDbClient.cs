@@ -22,8 +22,8 @@ public sealed class SqLiteDbClient : DbClient
     {
     }
 
-    public override Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename,
-        string backupName, EBackupType backupType, bool compression, CancellationToken cancellationToken = default)
+    public override Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename, string backupName,
+        EBackupType backupType, bool compression, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -40,8 +40,7 @@ public sealed class SqLiteDbClient : DbClient
         throw new NotImplementedException();
     }
 
-    public override Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(
-        CancellationToken cancellationToken = default)
+    public override Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -63,8 +62,7 @@ public sealed class SqLiteDbClient : DbClient
         throw new NotImplementedException();
     }
 
-    public override Task<OneOf<bool, Err[]>> IsServerAllowsCompression(
-        CancellationToken cancellationToken = default)
+    public override Task<OneOf<bool, Err[]>> IsServerAllowsCompression(CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -104,8 +102,7 @@ public sealed class SqLiteDbClient : DbClient
     //    throw new NotImplementedException();
     //}
 
-    public override Task<Option<Err[]>> TestConnection(bool withDatabase,
-        CancellationToken cancellationToken = default)
+    public override Task<Option<Err[]>> TestConnection(bool withDatabase, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
