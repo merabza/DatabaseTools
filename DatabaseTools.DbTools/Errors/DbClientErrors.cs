@@ -11,22 +11,22 @@ public static class DbClientErrors
 
     public static readonly Err NoBackupFolder = new()
     {
-        ErrorCode = nameof(NoRestoreFileNames), ErrorMessage = "No information about Backup folder"
+        ErrorCode = nameof(NoBackupFolder), ErrorMessage = "No information about Backup folder"
     };
 
     public static readonly Err NoRestoreFrom = new()
     {
-        ErrorCode = nameof(NoRestoreFileNames), ErrorMessage = "No information about from folder to restore"
+        ErrorCode = nameof(NoRestoreFrom), ErrorMessage = "No information about from folder to restore"
     };
 
     public static readonly Err NoDataFolder = new()
     {
-        ErrorCode = nameof(NoRestoreFileNames), ErrorMessage = "No information about data folder to restore"
+        ErrorCode = nameof(NoDataFolder), ErrorMessage = "No information about data folder to restore"
     };
 
     public static readonly Err NoDataLogFolder = new()
     {
-        ErrorCode = nameof(NoRestoreFileNames), ErrorMessage = "No information about data log folder to restore"
+        ErrorCode = nameof(NoDataLogFolder), ErrorMessage = "No information about data log folder to restore"
     };
 
     public static readonly Err NoRestoreFileNames = new()

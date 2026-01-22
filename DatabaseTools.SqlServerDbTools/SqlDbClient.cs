@@ -39,12 +39,17 @@ public sealed class SqlDbClient : DbClient
     public override Task<Option<Err[]>> BackupDatabase(string databaseName, string backupFilename, string backupName,
         EBackupType backupType, bool compression, CancellationToken cancellationToken = default)
     {
-        var buTypeWord = "DATABASE";
+        string buTypeWord = "DATABASE";
         if (backupType == EBackupType.TrLog)
+        {
             buTypeWord = "LOG";
-        var buDifferentialWord = string.Empty;
+        }
+
+        string buDifferentialWord = string.Empty;
         if (backupType == EBackupType.Diff)
+        {
             buDifferentialWord = "DIFFERENTIAL, ";
+        }
 
         return ExecuteCommand($"""
                                BACKUP {buTypeWord} [{databaseName}]
@@ -93,20 +98,24 @@ public sealed class SqlDbClient : DbClient
         CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
         try
         {
-            var query = $"RESTORE FILELISTONLY FROM  DISK = N'{backupFileFullName}' WITH  NOUNLOAD,  FILE = 1";
+            string query = $"RESTORE FILELISTONLY FROM  DISK = N'{backupFileFullName}' WITH  NOUNLOAD,  FILE = 1";
             dbm.Open();
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
+            using IDataReader reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             var fileNames = new List<RestoreFileModel>();
             while (reader.Read())
+            {
                 fileNames.Add(new RestoreFileModel((string)reader["LogicalName"], (string)reader["Type"]));
+            }
 
             return fileNames;
         }
@@ -126,18 +135,24 @@ public sealed class SqlDbClient : DbClient
         CancellationToken cancellationToken = default)
     {
         if (files == null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.NoRestoreFileNames, cancellationToken);
+        }
 
-        var dataPart = files.SingleOrDefault(s => s.Type == "D");
+        RestoreFileModel? dataPart = files.SingleOrDefault(s => s.Type == "D");
         if (dataPart == null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.NoDataPart, cancellationToken);
+        }
 
-        var logPart = files.SingleOrDefault(s => s.Type == "L");
+        RestoreFileModel? logPart = files.SingleOrDefault(s => s.Type == "L");
         if (logPart == null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.NoLogPart, cancellationToken);
+        }
 
-        var dataPartFileFullName = $"{dataFolderName.AddNeedLastPart(dirSeparator)}{databaseName}.mdf";
-        var dataLogPartFileFullName = $"{dataLogFolderName.AddNeedLastPart(dirSeparator)}{databaseName}_log.ldf";
+        string dataPartFileFullName = $"{dataFolderName.AddNeedLastPart(dirSeparator)}{databaseName}.mdf";
+        string dataLogPartFileFullName = $"{dataLogFolderName.AddNeedLastPart(dirSeparator)}{databaseName}_log.ldf";
 
         return await ExecuteCommand($"""
                                      RESTORE DATABASE [{databaseName}]
@@ -152,22 +167,28 @@ public sealed class SqlDbClient : DbClient
         CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
-        if (dbm.ConnectionString == string.Empty)
+        if (string.IsNullOrEmpty(dbm.ConnectionString))
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.ConnectionServerDoesNotSpecified,
                 cancellationToken);
+        }
 
         try
         {
             dbm.Open();
             dbm.Close();
-            if (dbm.Database == string.Empty && withDatabase)
+            if (string.IsNullOrEmpty(dbm.Database) && withDatabase)
+            {
                 return await LogErrorAndSendMessageFromError(DbClientErrors.DatabaseNameIsNotSpecified,
                     cancellationToken);
+            }
 
             _logger.LogInformation("Test Connection Succeeded");
             return null;
@@ -186,27 +207,35 @@ public sealed class SqlDbClient : DbClient
     private async Task<Option<Err[]>> RegWrite(string sqlServerProductVersion, string instanceName,
         string? subRegFolder, string parameterName, string newValue, CancellationToken cancellationToken = default)
     {
-        var serverVersionParts = sqlServerProductVersion.Split('.');
-        if (!int.TryParse(serverVersionParts[0], out var serverVersionNum))
+        string[] serverVersionParts = sqlServerProductVersion.Split('.');
+        if (!int.TryParse(serverVersionParts[0], out int serverVersionNum))
+        {
             return new[] { SqlDbClientErrors.InvalidSqlServerProductVersion };
+        }
+
         if (serverVersionParts.Length <= 1)
+        {
             return new[] { SqlDbClientErrors.InvalidSqlServerVersionParts };
+        }
 
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
         try
         {
             dbm.ClearParameters();
             dbm.Open();
-            var query = serverVersionNum > 10
+            string srf = subRegFolder == null ? string.Empty : $@"\{subRegFolder}";
+            string query = serverVersionNum > 10
                 ? $"""
                    EXEC master.dbo.xp_instance_regwrite
                     N'HKEY_LOCAL_MACHINE',
-                    N'Software\Microsoft\MSSQLServer\MSSQLServer{(subRegFolder == null ? string.Empty : $@"\{subRegFolder}")}',
+                    N'Software\Microsoft\MSSQLServer\MSSQLServer{srf}',
                     '{parameterName}',
                     REG_SZ,
                     N'{newValue}'
@@ -214,13 +243,13 @@ public sealed class SqlDbClient : DbClient
                 : $"""
                    EXEC master.dbo.xp_regwrite
                     N'HKEY_LOCAL_MACHINE',
-                    N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{(subRegFolder == null ? string.Empty : $@"\{subRegFolder}")}',
+                    N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{srf}',
                     N'{parameterName}',
                     REG_SZ,
                     N'{newValue}'
                    """;
             // ReSharper disable once using
-            var affectedCount = await dbm.ExecuteNonQueryAsync(query, CommandType.Text, cancellationToken);
+            int affectedCount = await dbm.ExecuteNonQueryAsync(query, CommandType.Text, cancellationToken);
 
             return affectedCount != 1 ? new[] { SqlDbClientErrors.ErrorWriteRegData(parameterName, newValue) } : null;
         }
@@ -237,29 +266,40 @@ public sealed class SqlDbClient : DbClient
     private async ValueTask<OneOf<string?, Err[]>> RegRead(string sqlServerProductVersion, string instanceName,
         string? subRegFolder, string parameterName, CancellationToken cancellationToken = default)
     {
-        var serverVersionParts = sqlServerProductVersion.Split('.');
-        if (!int.TryParse(serverVersionParts[0], out var serverVersionNum))
+        string[] serverVersionParts = sqlServerProductVersion.Split('.');
+        if (!int.TryParse(serverVersionParts[0], out int serverVersionNum))
+        {
             return new[] { SqlDbClientErrors.InvalidSqlServerProductVersion };
+        }
+
         if (serverVersionParts.Length <= 1)
+        {
             return new[] { SqlDbClientErrors.InvalidSqlServerVersionParts };
+        }
 
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
         try
         {
             dbm.ClearParameters();
             dbm.Open();
-            var query = serverVersionNum > 10
-                ? $@"EXEC master.dbo.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'Software\Microsoft\MSSQLServer\MSSQLServer{(subRegFolder == null ? string.Empty : $@"\{subRegFolder}")}', '{parameterName}'"
-                : $@"EXEC master.dbo.xp_regread N'HKEY_LOCAL_MACHINE', N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{(subRegFolder == null ? string.Empty : $@"\{subRegFolder}")}', N'{parameterName}'";
+            string srf = subRegFolder == null ? string.Empty : $@"\{subRegFolder}";
+            string query = serverVersionNum > 10
+                ? $@"EXEC master.dbo.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'Software\Microsoft\MSSQLServer\MSSQLServer{srf}', '{parameterName}'"
+                : $@"EXEC master.dbo.xp_regread N'HKEY_LOCAL_MACHINE', N'SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL{serverVersionParts[0]}_{serverVersionParts[1]}.{instanceName}\MSSQLServer{srf}', N'{parameterName}'";
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
+            using IDataReader reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             if (reader.Read())
+            {
                 return reader.GetString(1);
+            }
+
             return (string?)null;
         }
         catch (Exception ex)
@@ -283,19 +323,26 @@ public sealed class SqlDbClient : DbClient
         string parameterName, string subRegFolder, string subParameterName,
         CancellationToken cancellationToken = default)
     {
-        var regReadDefaultDataResult = await RegRead(serverProductVersion, serverInstanceName, null, parameterName,
-            cancellationToken);
+        OneOf<string?, Err[]> regReadDefaultDataResult = await RegRead(serverProductVersion, serverInstanceName, null,
+            parameterName, cancellationToken);
         if (regReadDefaultDataResult.IsT1)
+        {
             return regReadDefaultDataResult.AsT1;
-        var defaultDataDirectory = regReadDefaultDataResult.AsT0;
+        }
+
+        string? defaultDataDirectory = regReadDefaultDataResult.AsT0;
 
         if (defaultDataDirectory is not null)
+        {
             return defaultDataDirectory;
+        }
 
-        var regReadParametersResult0 = await RegRead(serverProductVersion, serverInstanceName, subRegFolder,
-            subParameterName, cancellationToken);
+        OneOf<string?, Err[]> regReadParametersResult0 = await RegRead(serverProductVersion, serverInstanceName,
+            subRegFolder, subParameterName, cancellationToken);
         if (regReadParametersResult0.IsT1)
+        {
             return regReadParametersResult0.AsT1;
+        }
 
         return GetMasterDir(regReadParametersResult0.AsT0);
     }
@@ -303,42 +350,63 @@ public sealed class SqlDbClient : DbClient
     public override async Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(
         CancellationToken cancellationToken = default)
     {
-        var serverProductVersionResult = await GetServerProductVersion(cancellationToken);
+        OneOf<string, Err[]> serverProductVersionResult = await GetServerProductVersion(cancellationToken);
         if (serverProductVersionResult.IsT1)
+        {
             return serverProductVersionResult.AsT1;
-        var serverProductVersion = serverProductVersionResult.AsT0;
-        var serverInstanceNameResult = await GetServerInstanceName(cancellationToken);
+        }
+
+        string? serverProductVersion = serverProductVersionResult.AsT0;
+        OneOf<string, Err[]> serverInstanceNameResult = await GetServerInstanceName(cancellationToken);
         if (serverInstanceNameResult.IsT1)
+        {
             return serverInstanceNameResult.AsT1;
-        var serverInstanceName = serverInstanceNameResult.AsT0;
-        var regReadBackupDirectoryResult = await RegRead(serverProductVersion, serverInstanceName, null,
-            CBackupDirectory, cancellationToken);
+        }
+
+        string? serverInstanceName = serverInstanceNameResult.AsT0;
+        OneOf<string?, Err[]> regReadBackupDirectoryResult = await RegRead(serverProductVersion, serverInstanceName,
+            null, CBackupDirectory, cancellationToken);
         if (regReadBackupDirectoryResult.IsT1)
+        {
             return regReadBackupDirectoryResult.AsT1;
-        var backupDirectory = regReadBackupDirectoryResult.AsT0;
+        }
+
+        string? backupDirectory = regReadBackupDirectoryResult.AsT0;
 
         //თუ სპეციალურად არ არის განსაზღვრული, რომელი ფოლდერი უნდა გამოიყენოს სერვერმა ბაზებისათვის, მაშინ იყენებს მასტერის ადგილმდებარეობას
-        var regReadDefaultDataResult = await DoubleRegRead(serverProductVersion, serverInstanceName, CDefaultData,
-            CParameters, "SqlArg0", cancellationToken);
+        OneOf<string?, Err[]> regReadDefaultDataResult = await DoubleRegRead(serverProductVersion, serverInstanceName,
+            CDefaultData, CParameters, "SqlArg0", cancellationToken);
         if (regReadDefaultDataResult.IsT1)
+        {
             return regReadDefaultDataResult.AsT1;
-        var defaultDataDirectory = regReadDefaultDataResult.AsT0;
+        }
 
-        var regReadDefaultLogResult = await DoubleRegRead(serverProductVersion, serverInstanceName, CDefaultLog,
-            CParameters, "SqlArg1", cancellationToken);
+        string? defaultDataDirectory = regReadDefaultDataResult.AsT0;
+
+        OneOf<string?, Err[]> regReadDefaultLogResult = await DoubleRegRead(serverProductVersion, serverInstanceName,
+            CDefaultLog, CParameters, "SqlArg1", cancellationToken);
         if (regReadDefaultLogResult.IsT1)
+        {
             return regReadDefaultLogResult.AsT1;
-        var defaultLogDirectory = regReadDefaultLogResult.AsT0;
+        }
 
-        var isServerAllowsCompressionResult = await IsServerAllowsCompression(cancellationToken);
+        string? defaultLogDirectory = regReadDefaultLogResult.AsT0;
+
+        OneOf<bool, Err[]> isServerAllowsCompressionResult = await IsServerAllowsCompression(cancellationToken);
         if (isServerAllowsCompressionResult.IsT1)
+        {
             return isServerAllowsCompressionResult.AsT1;
-        var isServerAllowsCompression = isServerAllowsCompressionResult.AsT0;
+        }
 
-        var serverNameResult = await ServerName(cancellationToken);
+        bool isServerAllowsCompression = isServerAllowsCompressionResult.AsT0;
+
+        OneOf<string, Err[]> serverNameResult = await ServerName(cancellationToken);
         if (serverNameResult.IsT1)
+        {
             return serverNameResult.AsT1;
-        var serverName = serverNameResult.AsT0;
+        }
+
+        string? serverName = serverNameResult.AsT0;
 
         return new DbServerInfo(serverProductVersion, serverInstanceName, backupDirectory, defaultDataDirectory,
             defaultLogDirectory, isServerAllowsCompression, serverName);
@@ -348,19 +416,24 @@ public sealed class SqlDbClient : DbClient
         string? defString = null)
     {
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
         try
         {
             dbm.ClearParameters();
             dbm.Open();
-            var executeScalarAsyncResult =
+            string? executeScalarAsyncResult =
                 await dbm.ExecuteScalarAsync<string>(query, null, CommandType.Text, cancellationToken) ?? defString;
             if (executeScalarAsyncResult is null)
+            {
                 return new[] { SqlDbClientErrors.ServerStringIsNull };
+            }
+
             _memoServerProductVersion = executeScalarAsyncResult;
             return _memoServerProductVersion;
         }
@@ -378,12 +451,17 @@ public sealed class SqlDbClient : DbClient
     private async ValueTask<OneOf<string, Err[]>> GetServerProductVersion(CancellationToken cancellationToken = default)
     {
         if (_memoServerProductVersion != null)
+        {
             return _memoServerProductVersion;
+        }
 
         const string query = "SELECT SERVERPROPERTY('productversion')";
-        var getServerStringResult = await GetServerString(query, cancellationToken);
+        OneOf<string, Err[]> getServerStringResult = await GetServerString(query, cancellationToken);
         if (getServerStringResult.IsT1)
+        {
             return Err.RecreateErrors(getServerStringResult.AsT1, SqlDbClientErrors.ProductVersionIsNotDetected);
+        }
+
         _memoServerProductVersion = getServerStringResult.AsT0;
         return _memoServerProductVersion;
     }
@@ -391,13 +469,18 @@ public sealed class SqlDbClient : DbClient
     private async ValueTask<OneOf<string, Err[]>> GetServerInstanceName(CancellationToken cancellationToken = default)
     {
         if (_memoServerInstanceName != null)
+        {
             return _memoServerInstanceName;
+        }
 
         //const string query = "SELECT SERVERPROPERTY('InstanceName')";
         const string query = "SELECT @@servicename";
-        var getServerStringResult = await GetServerString(query, cancellationToken);
+        OneOf<string, Err[]> getServerStringResult = await GetServerString(query, cancellationToken);
         if (getServerStringResult.IsT1)
+        {
             return Err.RecreateErrors(getServerStringResult.AsT1, SqlDbClientErrors.ServerInstanceNameIsNotDetected);
+        }
+
         _memoServerInstanceName = getServerStringResult.AsT0;
         return _memoServerInstanceName;
     }
@@ -406,10 +489,12 @@ public sealed class SqlDbClient : DbClient
         CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
         try
         {
@@ -423,10 +508,13 @@ public sealed class SqlDbClient : DbClient
                                  """;
             var dbNames = new List<DatabaseInfoModel>();
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
+            using IDataReader reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             while (reader.Read())
+            {
                 dbNames.Add(new DatabaseInfoModel(reader.GetString(1), (EDatabaseRecoveryModel)reader.GetByte(2),
                     reader.GetInt32(3) != 0));
+            }
+
             return dbNames;
         }
         catch (Exception ex)
@@ -444,15 +532,20 @@ public sealed class SqlDbClient : DbClient
         string? databaseName = null)
     {
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
         try
         {
             if (databaseName is not null)
+            {
                 dbm.AddParameter("@database", databaseName);
+            }
+
             dbm.Open();
             return await dbm.ExecuteScalarAsync(query, 0, CommandType.Text, cancellationToken) == 1;
         }
@@ -480,17 +573,20 @@ public sealed class SqlDbClient : DbClient
     public override async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken = default)
     {
         const string queryString = "SELECT CONNECTIONPROPERTY('client_net_address') AS client_net_address";
-        var getServerStringResult = await GetServerString(queryString, cancellationToken);
+        OneOf<string, Err[]> getServerStringResult = await GetServerString(queryString, cancellationToken);
         if (getServerStringResult.IsT1)
+        {
             return Err.RecreateErrors(getServerStringResult.AsT1, SqlDbClientErrors.ClientNetAddressIsNotDetected);
-        var clientNetAddress = getServerStringResult.AsT0;
+        }
+
+        string? clientNetAddress = getServerStringResult.AsT0;
         return clientNetAddress is "<local machine>" or "127.0.0.1";
     }
 
     public override Task<Option<Err[]>> CheckRepairDatabase(string databaseName,
         CancellationToken cancellationToken = default)
     {
-        var strCommand = $"DBCC CHECKDB(N'{databaseName}') WITH NO_INFOMSGS";
+        string strCommand = $"DBCC CHECKDB(N'{databaseName}') WITH NO_INFOMSGS";
         return ExecuteCommand(strCommand, true, false, cancellationToken);
     }
 
@@ -499,10 +595,12 @@ public sealed class SqlDbClient : DbClient
 
     {
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
         try
         {
@@ -510,10 +608,13 @@ public sealed class SqlDbClient : DbClient
             const string query = "exec sp_stored_procedures";
 
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
+            using IDataReader reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             var storedProcedures = new List<Tuple<string, string>>();
             while (reader.Read())
+            {
                 storedProcedures.Add(new Tuple<string, string>(reader.GetString(1), reader.GetString(2)));
+            }
+
             return storedProcedures;
         }
         catch (Exception ex)
@@ -532,19 +633,23 @@ public sealed class SqlDbClient : DbClient
         var triggers = new List<string>();
 
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
         try
         {
             dbm.Open();
             const string query = "SELECT name FROM sys.triggers WHERE type = 'TR'";
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
+            using IDataReader reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             while (reader.Read())
+            {
                 triggers.Add(reader.GetString(0));
+            }
         }
         catch (Exception ex)
         {
@@ -562,10 +667,12 @@ public sealed class SqlDbClient : DbClient
     private async Task<OneOf<List<string>, Err[]>> GetDatabaseTableNames(CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
         try
         {
@@ -584,10 +691,13 @@ public sealed class SqlDbClient : DbClient
                                  """;
 
             // ReSharper disable once using
-            using var reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
+            using IDataReader reader = await dbm.ExecuteReaderAsync(query, CommandType.Text, cancellationToken);
             var tableNames = new List<string>();
             while (reader.Read())
+            {
                 tableNames.Add(reader.GetString(0));
+            }
+
             return tableNames;
         }
         catch (Exception ex)
@@ -620,35 +730,50 @@ public sealed class SqlDbClient : DbClient
             cancellationToken);
 
         if (cancellationToken.IsCancellationRequested)
+        {
             return new[] { DbToolsErrors.CancellationRequested(nameof(RecompileProcedures)) };
+        }
 
-        var serverName = await ServerName(cancellationToken);
+        OneOf<string, Err[]> serverName = await ServerName(cancellationToken);
 
         await LogInfoAndSendMessage("{0}_{1} Recompiling Stored Procedures...", serverName, databaseName,
             cancellationToken);
 
-        var getStoredProcedureNamesResult = await GetStoredProcedureNames(cancellationToken);
+        OneOf<List<Tuple<string, string>>, Err[]> getStoredProcedureNamesResult =
+            await GetStoredProcedureNames(cancellationToken);
         if (getStoredProcedureNamesResult.IsT1)
+        {
             return getStoredProcedureNamesResult.AsT1;
-        var storedProcedureNames = getStoredProcedureNamesResult.AsT0;
-        var procNames = storedProcedureNames.Where(w => w.Item1 != "sys" && !w.Item2.StartsWith("dt_"))
-            .Select(s => s.Item2).ToArray();
+        }
 
-        foreach (var strCurProcName in procNames)
+        List<Tuple<string, string>>? storedProcedureNames = getStoredProcedureNamesResult.AsT0;
+        string[] procNames = storedProcedureNames
+            .Where(w => w.Item1 != "sys" && !w.Item2.StartsWith("dt_", StringComparison.Ordinal)).Select(s => s.Item2)
+            .ToArray();
+
+        foreach (string strCurProcName in procNames)
         {
             if (cancellationToken.IsCancellationRequested)
+            {
                 return new[] { DbToolsErrors.CancellationRequested(nameof(RecompileProcedures)) };
+            }
 
             char[] separators = [';'];
-            var splitWords = strCurProcName.Split(separators);
-            var strProcName = splitWords[0];
+            string[] splitWords = strCurProcName.Split(separators);
+            string strProcName = splitWords[0];
             try
             {
                 if (cancellationToken.IsCancellationRequested)
+                {
                     return new[] { DbToolsErrors.CancellationRequested(nameof(RecompileProcedures)) };
-                var recompileDatabaseObjectResult = await RecompileDatabaseObject(strProcName, cancellationToken);
+                }
+
+                Option<Err[]> recompileDatabaseObjectResult =
+                    await RecompileDatabaseObject(strProcName, cancellationToken);
                 if (recompileDatabaseObjectResult.IsSome)
+                {
                     return (Err[])recompileDatabaseObjectResult;
+                }
             }
             catch (Exception ex)
             {
@@ -659,21 +784,29 @@ public sealed class SqlDbClient : DbClient
 
         await LogInfoAndSendMessage("{0}_{1} Recompiling Triggers...", serverName, databaseName, cancellationToken);
 
-        var getTriggerNames = await GetTriggerNames(cancellationToken);
+        OneOf<List<string>, Err[]> getTriggerNames = await GetTriggerNames(cancellationToken);
         if (getTriggerNames.IsT1)
+        {
             return getTriggerNames.AsT1;
-        var triggerNames = getTriggerNames.AsT0;
+        }
 
-        foreach (var strTriggerName in triggerNames)
+        List<string>? triggerNames = getTriggerNames.AsT0;
+
+        foreach (string strTriggerName in triggerNames)
         {
             if (cancellationToken.IsCancellationRequested)
+            {
                 return new[] { DbToolsErrors.CancellationRequested(nameof(RecompileProcedures)) };
+            }
 
             try
             {
-                var recompileDatabaseObjectResult = await RecompileDatabaseObject(strTriggerName, cancellationToken);
+                Option<Err[]> recompileDatabaseObjectResult =
+                    await RecompileDatabaseObject(strTriggerName, cancellationToken);
                 if (recompileDatabaseObjectResult.IsSome)
+                {
                     return (Err[])recompileDatabaseObjectResult;
+                }
             }
             catch (Exception ex)
             {
@@ -688,31 +821,42 @@ public sealed class SqlDbClient : DbClient
     public override async Task<Option<Err[]>> UpdateStatistics(string databaseName,
         CancellationToken cancellationToken = default)
     {
-        var serverName = await ServerName(cancellationToken);
+        OneOf<string, Err[]> serverName = await ServerName(cancellationToken);
 
         await LogInfoAndSendMessage("Update Statistics for database {0}_{1}...", serverName, databaseName,
             cancellationToken);
 
         if (cancellationToken.IsCancellationRequested)
+        {
             return new[] { DbToolsErrors.CancellationRequested(nameof(UpdateStatistics)) };
+        }
+
         //დადგინდეს მიმდინარე პერიოდისათვის შესრულდა თუ არა უკვე ეს პროცედურა. 
         //ამისათვის, საჭიროა ვიპოვოთ წინა პროცედურის დასრულების აღსანიშნავი ფაილი
         //და დავადგინოთ მისი შესრულების თარიღი.
         //თუ ეს თარიღი მიმდინარე პერიოდშია, მაშინ პროცედურა აღარ უნდა შესრულდეს
         try
         {
-            var getDatabaseTableNamesResult = await GetDatabaseTableNames(cancellationToken);
+            OneOf<List<string>, Err[]> getDatabaseTableNamesResult = await GetDatabaseTableNames(cancellationToken);
             if (getDatabaseTableNamesResult.IsT1)
+            {
                 return getDatabaseTableNamesResult.AsT1;
-            var tableNames = getDatabaseTableNamesResult.AsT0;
-            foreach (var strTableName in tableNames)
+            }
+
+            List<string>? tableNames = getDatabaseTableNamesResult.AsT0;
+            foreach (string strTableName in tableNames)
             {
                 if (cancellationToken.IsCancellationRequested)
+                {
                     return new[] { DbToolsErrors.CancellationRequested(nameof(UpdateStatistics)) };
-                var updateStatisticsForOneTableResult =
+                }
+
+                Option<Err[]> updateStatisticsForOneTableResult =
                     await UpdateStatisticsForOneTable(strTableName, cancellationToken);
                 if (updateStatisticsForOneTableResult.IsSome)
+                {
                     return (Err[])updateStatisticsForOneTableResult;
+                }
             }
         }
         catch (Exception ex)
@@ -727,29 +871,41 @@ public sealed class SqlDbClient : DbClient
     public override async Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
         string defLogFolder, CancellationToken cancellationToken = default)
     {
-        var serverProductVersionResult = await GetServerProductVersion(cancellationToken);
+        OneOf<string, Err[]> serverProductVersionResult = await GetServerProductVersion(cancellationToken);
         if (serverProductVersionResult.IsT1)
+        {
             return serverProductVersionResult.AsT1;
-        var serverProductVersion = serverProductVersionResult.AsT0;
-        var serverInstanceNameResult = await GetServerInstanceName(cancellationToken);
-        if (serverInstanceNameResult.IsT1)
-            return serverInstanceNameResult.AsT1;
-        var serverInstanceName = serverInstanceNameResult.AsT0;
+        }
 
-        var regWriteResult = await RegWrite(serverProductVersion, serverInstanceName, null, CBackupDirectory,
+        string? serverProductVersion = serverProductVersionResult.AsT0;
+        OneOf<string, Err[]> serverInstanceNameResult = await GetServerInstanceName(cancellationToken);
+        if (serverInstanceNameResult.IsT1)
+        {
+            return serverInstanceNameResult.AsT1;
+        }
+
+        string? serverInstanceName = serverInstanceNameResult.AsT0;
+
+        Option<Err[]> regWriteResult = await RegWrite(serverProductVersion, serverInstanceName, null, CBackupDirectory,
             defBackupFolder, cancellationToken);
         if (regWriteResult.IsSome)
+        {
             return (Err[])regWriteResult;
+        }
 
-        var regWriteDataResult = await RegWrite(serverProductVersion, serverInstanceName, null, CDefaultData,
+        Option<Err[]> regWriteDataResult = await RegWrite(serverProductVersion, serverInstanceName, null, CDefaultData,
             defDataFolder, cancellationToken);
         if (regWriteDataResult.IsSome)
+        {
             return (Err[])regWriteDataResult;
+        }
 
-        var regWriteLogResult = await RegWrite(serverProductVersion, serverInstanceName, null, CDefaultLog,
+        Option<Err[]> regWriteLogResult = await RegWrite(serverProductVersion, serverInstanceName, null, CDefaultLog,
             defLogFolder, cancellationToken);
         if (regWriteLogResult.IsSome)
+        {
             return (Err[])regWriteLogResult;
+        }
 
         return null;
     }
@@ -757,7 +913,7 @@ public sealed class SqlDbClient : DbClient
     public override Task<Option<Err[]>> ChangeDatabaseRecoveryModel(string databaseName,
         EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken)
     {
-        var recoveryModel = databaseRecoveryModel switch
+        string recoveryModel = databaseRecoveryModel switch
         {
             EDatabaseRecoveryModel.Full => "FULL",
             EDatabaseRecoveryModel.BulkLogged => "BULK_LOGGED",
@@ -777,9 +933,12 @@ public sealed class SqlDbClient : DbClient
     private async Task<OneOf<string, Err[]>> ServerName(CancellationToken cancellationToken = default)
     {
         const string query = "SELECT @@servername";
-        var getServerStringResult = await GetServerString(query, cancellationToken);
+        OneOf<string, Err[]> getServerStringResult = await GetServerString(query, cancellationToken);
         if (getServerStringResult.IsT1)
+        {
             return Err.RecreateErrors(getServerStringResult.AsT1, SqlDbClientErrors.ServerNameIsNotDetected);
+        }
+
         return getServerStringResult.AsT0;
     }
 }

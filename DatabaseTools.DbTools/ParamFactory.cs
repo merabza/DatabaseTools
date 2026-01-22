@@ -39,22 +39,21 @@ public static class ParamFactory
 
     public static DataParameter CreateParameter(string name, Type type, object? value, bool checkDefault = true)
     {
-        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(type), name);
-        if (checkDefault && value == null)
-            p.Value = DBNull.Value;
-        else
-            p.Value = value;
+        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(type), name)
+        {
+            Value = checkDefault && value == null ? DBNull.Value : value
+        };
+
         return p;
     }
 
     public static DataParameter CreateParameter<T>(string name, T value, bool checkDefault = false)
     {
-        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(typeof(T)), name);
-        if (checkDefault && Equals(value, default(T)))
-            p.Value = DBNull.Value;
-        else
-            p.Value = value;
-        p.ParameterName = name;
+        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(typeof(T)), name)
+        {
+            Value = checkDefault && Equals(value, default(T)) ? DBNull.Value : value, ParameterName = name
+        };
+
         return p;
     }
 

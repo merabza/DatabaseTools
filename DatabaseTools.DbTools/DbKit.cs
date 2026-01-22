@@ -1,11 +1,12 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.Common;
 
 namespace DatabaseTools.DbTools;
 
 public /*open*/ class DbKit
 {
-    public event InfoMessageEventHandler? InfoMessage;
+    public event EventHandler<InfoMessageEventArgs>? InfoMessage;
 
     public virtual DbConnectionStringBuilder? GetConnectionStringBuilder()
     {

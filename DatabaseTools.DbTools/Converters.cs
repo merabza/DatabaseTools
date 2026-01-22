@@ -24,10 +24,13 @@ public sealed class Converters
         get
         {
             if (_pInstance != null)
+            {
                 return _pInstance;
+            }
+
             lock (SyncRoot) //thread safe singleton
             {
-                _pInstance ??= new Converters();
+                _pInstance = new Converters();
             }
 
             return _pInstance;

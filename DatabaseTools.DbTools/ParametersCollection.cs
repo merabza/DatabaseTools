@@ -35,11 +35,14 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
     public override string ToString()
     {
         var sb = new StringBuilder();
-        var atLeastOneAdded = false;
-        foreach (var param in _dbParameters)
+        bool atLeastOneAdded = false;
+        foreach (DataParameter param in _dbParameters)
         {
             if (atLeastOneAdded)
+            {
                 sb.Append(';');
+            }
+
             sb.Append(param.ParameterName);
             sb.Append('=');
             sb.Append(param.Value);
@@ -51,10 +54,16 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
 
     public T? GetParameterValue<T>(string parameterName)
     {
-        if (!_dbParametersByNames.TryGetValue(parameterName, out var value))
+        if (!_dbParametersByNames.TryGetValue(parameterName, out DataParameter? value))
+        {
             throw new Exception("Invalid parameter Name");
+        }
+
         if (value.Value is not null && value.Value != DBNull.Value)
+        {
             return (T?)value.Value;
+        }
+
         return default;
     }
 
@@ -65,11 +74,11 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
 
     private static DataParameter CreateParameter<T>(string name, T value, bool checkDefault = false)
     {
-        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(typeof(T)), name);
-        if (checkDefault && Equals(value, default(T)))
-            p.Value = DBNull.Value;
-        else
-            p.Value = value;
+        var p = new DataParameter(Converters.Instance.GetDbTypeFromType(typeof(T)), name)
+        {
+            Value = checkDefault && Equals(value, default(T)) ? DBNull.Value : value
+        };
+
         return p;
     }
 
@@ -87,11 +96,16 @@ public sealed class ParametersCollection : IEnumerable<DataParameter>
     public void AddParameter(DataParameter parameter)
     {
         if (_dbParameters.Contains(parameter))
+        {
             throw new Exception("Parameter is already exists in collection");
+        }
+
         _dbParameters.Add(parameter);
-        var parameterName = parameter.ParameterName;
+        string parameterName = parameter.ParameterName;
         if (!string.IsNullOrWhiteSpace(parameterName))
+        {
             _dbParametersByNames.TryAdd(parameter.ParameterName, parameter);
+        }
     }
 
     public void Clear()

@@ -15,7 +15,10 @@ public static class DbKitFactory
     internal static DbKit? GetKit(DbConnection connection)
     {
         if (connection is SqlConnection)
+        {
             return new SqlKit();
+        }
+
         return connection is SqliteConnection ? new SqLiteDbKit() : null;
     }
 

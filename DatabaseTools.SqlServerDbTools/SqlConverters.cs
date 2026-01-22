@@ -26,10 +26,13 @@ public sealed class SqlConverters
         get
         {
             if (_pInstance != null)
+            {
                 return _pInstance;
+            }
+
             lock (SyncRoot) //thread safe singleton
             {
-                _pInstance ??= new SqlConverters();
+                _pInstance = new SqlConverters();
             }
 
             return _pInstance;

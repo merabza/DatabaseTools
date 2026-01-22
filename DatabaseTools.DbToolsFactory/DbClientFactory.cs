@@ -37,7 +37,9 @@ public static class DbClientFactory
                 conStrBuilder.TrustServerCertificate = trustServerCertificate;
 
                 if (databaseName != null)
+                {
                     conStrBuilder.InitialCatalog = databaseName;
+                }
 
                 return new SqlDbClient(logger, conStrBuilder, dbKit, useConsole, messagesDataManager, userName);
             case EDatabaseProvider.None:
@@ -47,7 +49,10 @@ public static class DbClientFactory
                 //თუ მონაცემთა ბაზის ფაილის სახელი ცნობილია
                 //ასხვანაირად კავშირის შექმნა შეუძლებელია აქსესის ბაზისთვის
                 if (databaseName == null)
+                {
                     return null;
+                }
+
                 var sqliteConStrBuilder = new SqliteConnectionStringBuilder
                 {
                     DataSource = databaseName,
@@ -61,7 +66,9 @@ public static class DbClientFactory
                 //თუ პროგრამა გაშვებულია ვინდოუსზე და თუ მონაცემთა ბაზის ფაილის სახელი ცნობილია
                 //ასხვანაირად კავშირის შექმნა შეუძლებელია აქსესის ბაზისთვის
                 if (!SystemStat.IsWindows() || databaseName == null)
+                {
                     return null;
+                }
 #pragma warning disable CA1416
                 var msAccessConStrBuilder = new OleDbConnectionStringBuilder
                 {

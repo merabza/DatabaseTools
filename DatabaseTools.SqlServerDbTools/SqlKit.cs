@@ -17,16 +17,24 @@ public sealed class SqlKit : DbKit
         // ReSharper disable once using
         var sqlConnection = new SqlConnection { FireInfoMessageEventOnUserErrors = fireInfoMessageEventOnUserErrors };
         if (fireInfoMessageEventOnUserErrors)
+        {
             sqlConnection.InfoMessage += sqlConnection_InfoMessage;
+        }
+
         return sqlConnection;
     }
 
     private void sqlConnection_InfoMessage(object sender, SqlInfoMessageEventArgs e)
     {
         if (!IsInfoMessageUsed())
+        {
             return;
+        }
+
         foreach (SqlError info in e.Errors)
+        {
             RaiseInfoMessageEvent(info.Message, info.Class);
+        }
     }
 
     public override DbCommand GetCommand()

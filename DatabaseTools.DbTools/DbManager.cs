@@ -23,7 +23,9 @@ public sealed class DbManager : IDisposable
         Connection.ConnectionString = connectionString;
         CommandTimeOut = commandTimeout;
         if (fireInfoMessageEventOnUserErrors)
+        {
             _kit.InfoMessage += DbKit_InfoMessage;
+        }
     }
 
     private int CommandTimeOut { get; }
@@ -36,43 +38,32 @@ public sealed class DbManager : IDisposable
     {
         Close();
         // Free other state (managed objects).
-        if (_dbCommand != null)
-        {
-            _dbCommand.Dispose();
-            _dbCommand = null;
-        }
+        _dbCommand?.Dispose();
+        _dbCommand = null;
 
-        if (_dataReader != null)
-        {
-            _dataReader.Dispose();
-            _dataReader = null;
-        }
+        _dataReader?.Dispose();
+        _dataReader = null;
 
-        if (_dbTransaction != null)
-        {
-            _dbTransaction.Dispose();
-            _dbTransaction = null;
-        }
+        _dbTransaction?.Dispose();
+        _dbTransaction = null;
 
         Connection.Dispose();
-
-        GC.Collect();
     }
 
-    public event InfoMessageEventHandler? InfoMessage;
+    public event EventHandler<InfoMessageEventArgs>? InfoMessage;
 
     public static DbManager? Create(DbKit kit, string connectionString = "", int commandTimeout = 0,
         bool fireInfoMessageEventOnUserErrors = false)
     {
         // ReSharper disable once using
-        var dbConnection = kit.GetConnection(fireInfoMessageEventOnUserErrors);
+        DbConnection? dbConnection = kit.GetConnection(fireInfoMessageEventOnUserErrors);
         return dbConnection is null
             ? null
             // ReSharper disable once DisposableConstructor
             : new DbManager(kit, dbConnection, connectionString, commandTimeout, fireInfoMessageEventOnUserErrors);
     }
 
-    private void DbKit_InfoMessage(object sender, InfoMessageEventArgs e)
+    private void DbKit_InfoMessage(object? sender, InfoMessageEventArgs e)
     {
         InfoMessage?.Invoke(sender, e);
     }
@@ -81,21 +72,32 @@ public sealed class DbManager : IDisposable
     public void Open()
     {
         if (Connection.State != ConnectionState.Open)
+        {
             Connection.Open();
+        }
     }
 
     //პარამეტრების მასივიდან პარამეტრების მიერთება ბრძანებაზე
     private void AttachParameters()
     {
         if (_dbCommand == null || _parameters == null)
-            return;
-        foreach (var param in _parameters)
         {
-            var p = _kit.GetParameter(param);
+            return;
+        }
+
+        foreach (DataParameter param in _parameters)
+        {
+            IDbDataParameter? p = _kit.GetParameter(param);
             if (p is null)
+            {
                 continue;
+            }
+
             if (param.Direction is ParameterDirection.InputOutput or ParameterDirection.Input && param.Value == null)
+            {
                 p.Value = DBNull.Value;
+            }
+
             _dbCommand.Parameters.Add(p);
         }
     }
@@ -104,15 +106,22 @@ public sealed class DbManager : IDisposable
     {
         _dbCommand = _kit.GetCommand();
         if (_dbCommand is null)
+        {
             throw new Exception("db command does not create");
+        }
+
         _dbCommand.CommandTimeout = CommandTimeOut;
         _dbCommand.Connection = Connection;
         _dbCommand.CommandType = commandType;
+#pragma warning disable CA2100
         _dbCommand.CommandText = commandText;
+#pragma warning restore CA2100
 
         // თუ ვიმყოფებით გახსნილ ტრანზაქციაში მივუთითოთ ის ბრძანებას
         if (_dbTransaction != null)
+        {
             _dbCommand.Transaction = _dbTransaction;
+        }
 
         //თუ გაგვაჩნია პარამეტრების მასივი, მივაერთოთ პარამეტრები ბრძანებაზე
         AttachParameters();
@@ -123,10 +132,13 @@ public sealed class DbManager : IDisposable
         CommandType commandType = CommandType.Text)
     {
         PrepareCommand(commandText, commandType);
-        var retVal = ExecuteScalar();
+        object? retVal = ExecuteScalar();
         _dbCommand?.Parameters.Clear();
         if (retVal != null && retVal != DBNull.Value)
+        {
             return (T?)retVal;
+        }
+
         return defaultValue;
     }
 
@@ -134,10 +146,13 @@ public sealed class DbManager : IDisposable
         CommandType commandType = CommandType.Text, CancellationToken cancellationToken = default)
     {
         PrepareCommand(commandText, commandType);
-        var retVal = await ExecuteScalarAsync(cancellationToken);
+        object? retVal = await ExecuteScalarAsync(cancellationToken);
         _dbCommand?.Parameters.Clear();
         if (retVal is not null && retVal != DBNull.Value)
+        {
             return (T?)retVal;
+        }
+
         return defaultValue;
     }
 
@@ -149,7 +164,10 @@ public sealed class DbManager : IDisposable
     private async ValueTask<object?> ExecuteScalarAsync(CancellationToken cancellationToken = default)
     {
         if (_dbCommand is null)
+        {
             return null;
+        }
+
         return await _dbCommand.ExecuteScalarAsync(cancellationToken);
     }
 
@@ -157,7 +175,7 @@ public sealed class DbManager : IDisposable
     public int ExecuteNonQuery(string commandText, CommandType commandType = CommandType.Text)
     {
         PrepareCommand(commandText, commandType);
-        var retVal = ExecuteNonQuery();
+        int retVal = ExecuteNonQuery();
         SavOutParameters();
         return retVal;
     }
@@ -165,10 +183,16 @@ public sealed class DbManager : IDisposable
     private void SavOutParameters()
     {
         if (_dbCommand is null || _parameters is null)
+        {
             return;
-        foreach (var parameter in _dbCommand.Parameters.Cast<DbParameter>()
+        }
+
+        foreach (DbParameter? parameter in _dbCommand.Parameters.Cast<DbParameter>()
                      .Where(s => s.Direction != ParameterDirection.Input))
+        {
             _parameters[parameter.ParameterName].Value = parameter.Value;
+        }
+
         _dbCommand.Parameters.Clear();
     }
 
@@ -176,7 +200,7 @@ public sealed class DbManager : IDisposable
         CancellationToken cancellationToken = default)
     {
         PrepareCommand(commandText, commandType);
-        var retVal = await ExecuteNonQueryAsync(cancellationToken);
+        int retVal = await ExecuteNonQueryAsync(cancellationToken);
         SavOutParameters();
         return retVal;
     }
@@ -190,7 +214,10 @@ public sealed class DbManager : IDisposable
     private async ValueTask<int> ExecuteNonQueryAsync(CancellationToken cancellationToken = default)
     {
         if (_dbCommand is null)
+        {
             return 0;
+        }
+
         return await _dbCommand.ExecuteNonQueryAsync(cancellationToken);
     }
 
@@ -216,7 +243,10 @@ public sealed class DbManager : IDisposable
     private async ValueTask<IDataReader> ExecuteReaderAsync(CancellationToken cancellationToken = default)
     {
         if (_dbCommand is null)
+        {
             throw new InvalidOperationException();
+        }
+
         return await _dbCommand.ExecuteReaderAsync(cancellationToken);
     }
 
@@ -229,7 +259,9 @@ public sealed class DbManager : IDisposable
     public void Close()
     {
         if (Connection.State != ConnectionState.Closed)
+        {
             Connection.Close();
+        }
     }
 
     public void AddParameter<T>(string name, T value, bool checkDefault = false)
@@ -252,7 +284,9 @@ public sealed class DbManager : IDisposable
     public void ClearParameters()
     {
         if (_parameters == null)
+        {
             return;
+        }
 
         _parameters.Clear();
         _parameters = null;

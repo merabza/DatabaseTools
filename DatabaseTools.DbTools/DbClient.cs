@@ -37,14 +37,18 @@ public /*open*/ abstract class DbClient : MessageLogger
         CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
         if (bLogStart)
+        {
             await LogInfoAndSendMessage("Start - {0} For Database - {1}.{2}", strCommand, dbm.Connection.DataSource,
                 dbm.Connection.Database, cancellationToken);
+        }
 
         try
         {
@@ -62,8 +66,10 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
 
         if (bLogFinish)
+        {
             await LogInfoAndSendMessage("Finish - {0} For Database - {1}.{2}", strCommand, dbm.Connection.DataSource,
                 dbm.Connection.Database, cancellationToken);
+        }
 
         return null;
     }
@@ -72,10 +78,12 @@ public /*open*/ abstract class DbClient : MessageLogger
         CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
-        using var dbm = GetDbManager();
+        using DbManager? dbm = GetDbManager();
         if (dbm is null)
+        {
             return await LogErrorAndSendMessageFromError(DbClientErrors.CannotCreateDatabaseConnection,
                 cancellationToken);
+        }
 
         try
         {
@@ -83,7 +91,10 @@ public /*open*/ abstract class DbClient : MessageLogger
             var executeScalarAsyncResult =
                 await dbm.ExecuteScalarAsync<T>(queryString, default, CommandType.Text, cancellationToken);
             if (executeScalarAsyncResult is null)
+            {
                 return new[] { DbClientErrors.ExecuteScalarAsyncResultIsNull() };
+            }
+
             return executeScalarAsyncResult;
         }
         catch (Exception ex)

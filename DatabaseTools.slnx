@@ -1,0 +1,21 @@
+<Solution>
+    <Folder Name="/ParametersManagement/">
+        <Project Path="../ParametersManagement/ParametersManagement.LibApiClientParameters/ParametersManagement.LibApiClientParameters.csproj" />
+        <Project Path="../ParametersManagement/ParametersManagement.LibDatabaseParameters/ParametersManagement.LibDatabaseParameters.csproj" />
+        <Project Path="../ParametersManagement/ParametersManagement.LibParameters/ParametersManagement.LibParameters.csproj" />
+    </Folder>
+    <Folder Name="/Solution Items/">
+        <File Path=".editorconfig" />
+        <File Path="Directory.Build.props" />
+        <File Path="Directory.Packages.props" />
+    </Folder>
+    <Folder Name="/SystemTools/">
+        <Project Path="../SystemTools/SystemTools.SystemToolsShared/SystemTools.SystemToolsShared.csproj" />
+    </Folder>
+    <Project Path="DatabaseTools.DbTools/DatabaseTools.DbTools.csproj" />
+    <Project Path="DatabaseTools.DbToolsFactory/DatabaseTools.DbToolsFactory.csproj" />
+    <Project Path="DatabaseTools.OleDbTools/DatabaseTools.OleDbTools.csproj" />
+    <Project Path="DatabaseTools.SqLiteDbTools/DatabaseTools.SqLiteDbTools.csproj" />
+    <Project Path="DatabaseTools.SqlServerDbTools/DatabaseTools.SqlServerDbTools.csproj" />
+    <Project Path="DatabaseTools/DatabaseTools.csproj" />
+</Solution>
