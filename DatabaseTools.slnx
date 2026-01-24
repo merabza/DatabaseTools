@@ -12,6 +12,9 @@
     <Folder Name="/SystemTools/">
         <Project Path="../SystemTools/SystemTools.SystemToolsShared/SystemTools.SystemToolsShared.csproj" />
     </Folder>
+    <Folder Name="/Tests/">
+        <Project Path="DatabaseTools.DbTools.Tests/DatabaseTools.DbTools.Tests.csproj" Id="1635090b-60a3-49f3-8cc3-5d9aea2ba793" />
+    </Folder>
     <Project Path="DatabaseTools.DbTools/DatabaseTools.DbTools.csproj" />
     <Project Path="DatabaseTools.DbToolsFactory/DatabaseTools.DbToolsFactory.csproj" />
     <Project Path="DatabaseTools.OleDbTools/DatabaseTools.OleDbTools.csproj" />
