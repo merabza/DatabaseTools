@@ -158,7 +158,8 @@ public class DbAuthSettingsCreatorTests
         var errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
-            nameof(DbToolsErrors.WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
+            nameof(DbToolsErrors
+                .WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
             errors[0].ErrorCode);
     }
 
@@ -179,7 +180,8 @@ public class DbAuthSettingsCreatorTests
         var errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
-            nameof(DbToolsErrors.WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
+            nameof(DbToolsErrors
+                .WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
             errors[0].ErrorCode);
     }
 
@@ -200,7 +202,8 @@ public class DbAuthSettingsCreatorTests
         var errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
-            nameof(DbToolsErrors.WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
+            nameof(DbToolsErrors
+                .WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
             errors[0].ErrorCode);
     }
 
@@ -221,7 +224,8 @@ public class DbAuthSettingsCreatorTests
         var errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
-            nameof(DbToolsErrors.WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
+            nameof(DbToolsErrors
+                .WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
             errors[0].ErrorCode);
     }
 
@@ -242,7 +246,8 @@ public class DbAuthSettingsCreatorTests
         var errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
-            nameof(DbToolsErrors.WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
+            nameof(DbToolsErrors
+                .WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
             errors[0].ErrorCode);
     }
 
@@ -263,7 +268,8 @@ public class DbAuthSettingsCreatorTests
         var errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
-            nameof(DbToolsErrors.WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
+            nameof(DbToolsErrors
+                .WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
             errors[0].ErrorCode);
     }
 
@@ -284,7 +290,8 @@ public class DbAuthSettingsCreatorTests
         var errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
-            nameof(DbToolsErrors.WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
+            nameof(DbToolsErrors
+                .WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
             errors[0].ErrorCode);
     }
 
@@ -305,7 +312,8 @@ public class DbAuthSettingsCreatorTests
         var errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
-            nameof(DbToolsErrors.WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
+            nameof(DbToolsErrors
+                .WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
             errors[0].ErrorCode);
     }
 
@@ -331,7 +339,8 @@ public class DbAuthSettingsCreatorTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void Create_WithSqlAuthenticationValidCredentialsAndUseConsoleParameter_ReturnsDbAuthSettings(bool useConsole)
+    public void Create_WithSqlAuthenticationValidCredentialsAndUseConsoleParameter_ReturnsDbAuthSettings(
+        bool useConsole)
     {
         // Arrange
         var windowsNtIntegratedSecurity = false;
