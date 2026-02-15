@@ -19,11 +19,11 @@ public static class DbClientFactory
         string? applicationName, string? databaseName = null, IMessagesDataManager? messagesDataManager = null,
         string? userName = null)
     {
-        var dbKit = DbKitFactory.GetKit(dataProvider);
+        DbKit dbKit = DbKitFactory.GetKit(dataProvider);
         switch (dataProvider)
         {
             case EDatabaseProvider.SqlServer:
-                var conStrBuilder = dbAuthSettingsBase is not DbAuthSettings dbAuthSettings
+                SqlConnectionStringBuilder conStrBuilder = dbAuthSettingsBase is not DbAuthSettings dbAuthSettings
                     ? new SqlConnectionStringBuilder { IntegratedSecurity = true }
                     : new SqlConnectionStringBuilder
                     {
