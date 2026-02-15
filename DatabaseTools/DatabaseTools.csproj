@@ -12,4 +12,13 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\DatabaseTools.DbTools.Tests\DatabaseTools.DbTools.Tests.csproj" />
+      <ProjectReference Include="..\DatabaseTools.DbToolsFactory\DatabaseTools.DbToolsFactory.csproj" />
+      <ProjectReference Include="..\DatabaseTools.DbTools\DatabaseTools.DbTools.csproj" />
+      <ProjectReference Include="..\DatabaseTools.OleDbTools\DatabaseTools.OleDbTools.csproj" />
+      <ProjectReference Include="..\DatabaseTools.SqLiteDbTools\DatabaseTools.SqLiteDbTools.csproj" />
+      <ProjectReference Include="..\DatabaseTools.SqlServerDbTools\DatabaseTools.SqlServerDbTools.csproj" />
+    </ItemGroup>
+
 </Project>
