@@ -7,7 +7,6 @@ using DatabaseTools.SqlServerDbTools;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
-using ParametersManagement.LibDatabaseParameters;
 using SystemTools.SystemToolsShared;
 
 namespace DatabaseTools.DbToolsFactory;
