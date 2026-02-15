@@ -1,9 +1,4 @@
 <Solution>
-    <Folder Name="/ParametersManagement/">
-        <Project Path="../ParametersManagement/ParametersManagement.LibApiClientParameters/ParametersManagement.LibApiClientParameters.csproj" />
-        <Project Path="../ParametersManagement/ParametersManagement.LibDatabaseParameters/ParametersManagement.LibDatabaseParameters.csproj" />
-        <Project Path="../ParametersManagement/ParametersManagement.LibParameters/ParametersManagement.LibParameters.csproj" />
-    </Folder>
     <Folder Name="/Solution Items/">
         <File Path=".editorconfig" />
         <File Path="Directory.Build.props" />

@@ -6,7 +6,7 @@ using DatabaseTools.SqLiteDbTools;
 using DatabaseTools.SqlServerDbTools;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
-using ParametersManagement.LibDatabaseParameters;
+using SystemTools.SystemToolsShared;
 
 namespace DatabaseTools.DbToolsFactory;
 
