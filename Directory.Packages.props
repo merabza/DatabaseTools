@@ -5,16 +5,16 @@
     <!--.NET 9 packages. Most of them will work on .NET 8. If you need to, make the updates here individually.-->
     <ItemGroup>
         <!-- Static code analysis -->
-        <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+        <PackageVersion Include="coverlet.collector" Version="8.0.0" />
         <PackageVersion Include="Microsoft.Data.SqlClient" Version="6.1.4" />
-        <PackageVersion Include="Microsoft.Data.Sqlite.Core" Version="10.0.2" />
-        <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
-        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+        <PackageVersion Include="Microsoft.Data.Sqlite.Core" Version="10.0.3" />
+        <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
         <PackageVersion Include="OneOf" Version="3.0.271" />
-        <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.18.0.131500" />
-        <PackageVersion Include="System.Data.OleDb" Version="10.0.2" />
+        <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.19.0.132793" />
+        <PackageVersion Include="System.Data.OleDb" Version="10.0.3" />
         <PackageVersion Include="System.Data.SQLite.Core" Version="1.0.119" />
         <PackageVersion Include="xunit" Version="2.9.3" />
-        <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+        <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     </ItemGroup>
 </Project>
