@@ -104,11 +104,7 @@ public sealed class DbManager : IDisposable
 
     private void PrepareCommand(string commandText, CommandType commandType)
     {
-        _dbCommand = _kit.GetCommand();
-        if (_dbCommand is null)
-        {
-            throw new Exception("db command does not create");
-        }
+        _dbCommand = _kit.GetCommand() ?? throw new Exception("db command does not create");
 
         _dbCommand.CommandTimeout = CommandTimeOut;
         _dbCommand.Connection = Connection;
