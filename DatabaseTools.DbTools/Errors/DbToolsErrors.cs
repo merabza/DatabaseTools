@@ -4,82 +4,75 @@ namespace DatabaseTools.DbTools.Errors;
 
 public static class DbToolsErrors
 {
-    public static Err WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified =>
+    public static Error WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified =>
         new()
         {
-            ErrorCode =
+            Code =
                 nameof(WindowsNtIntegratedSecurityIsOffAndServerUserDoesNotSpecifiedOrServerPassDoesNotSpecified),
-            ErrorMessage =
+            Name =
                 "WindowsNtIntegratedSecurity is off and serverUser does not specified or serverPass does not specified"
         };
 
-    public static Err ServerAddressIsEmptyCannotCreateSqlServerManagementClient =>
+    public static Error ServerAddressIsEmptyCannotCreateSqlServerManagementClient =>
         new()
         {
-            ErrorCode = nameof(ServerAddressIsEmptyCannotCreateSqlServerManagementClient),
-            ErrorMessage = "ServerAddress is empty, Cannot create SqlServerManagementClient"
+            Code = nameof(ServerAddressIsEmptyCannotCreateSqlServerManagementClient),
+            Name = "ServerAddress is empty, Cannot create SqlServerManagementClient"
         };
 
-    public static Err DatabaseProviderIsNone =>
-        new() { ErrorCode = nameof(DatabaseProviderIsNone), ErrorMessage = "Database Provider is None" };
+    public static Error DatabaseProviderIsNone =>
+        new() { Code = nameof(DatabaseProviderIsNone), Name = "Database Provider is None" };
 
-    public static Err DatabaseConnectionNameIsNotSpecified =>
-        new()
-        {
-            ErrorCode = nameof(DatabaseConnectionNameIsNotSpecified),
-            ErrorMessage = "databaseConnectionName is not specified"
-        };
+    public static Error DatabaseConnectionNameIsNotSpecified =>
+        new() { Code = nameof(DatabaseConnectionNameIsNotSpecified), Name = "databaseConnectionName is not specified" };
 
-    public static Err DevDatabaseNameIsNotSpecified =>
-        new() { ErrorCode = nameof(DevDatabaseNameIsNotSpecified), ErrorMessage = "dev DatabaseName is not specified" };
+    public static Error DevDatabaseNameIsNotSpecified =>
+        new() { Code = nameof(DevDatabaseNameIsNotSpecified), Name = "dev DatabaseName is not specified" };
 
-    //public static Err DevDatabaseRecoveryModelIsNotSpecified =>
+    //public static Error DevDatabaseRecoveryModelIsNotSpecified =>
     //    new()
     //    {
-    //        ErrorCode = nameof(DevDatabaseRecoveryModelIsNotSpecified),
-    //        ErrorMessage = "dev DatabaseRecoveryModel is not specified"
+    //        Code = nameof(DevDatabaseRecoveryModelIsNotSpecified),
+    //        Name = "dev DatabaseRecoveryModel is not specified"
     //    };
 
-    public static Err CreateSqLiteDatabaseManagerIsNotImplemented =>
+    public static Error CreateSqLiteDatabaseManagerIsNotImplemented =>
         new()
         {
-            ErrorCode = nameof(CreateSqLiteDatabaseManagerIsNotImplemented),
-            ErrorMessage = "CreateSqLiteDatabaseManager Is Not Implemented"
+            Code = nameof(CreateSqLiteDatabaseManagerIsNotImplemented),
+            Name = "CreateSqLiteDatabaseManager Is Not Implemented"
         };
 
-    public static Err CreateOleDatabaseManagerIsNotImplemented =>
+    public static Error CreateOleDatabaseManagerIsNotImplemented =>
         new()
         {
-            ErrorCode = nameof(CreateOleDatabaseManagerIsNotImplemented),
-            ErrorMessage = "CreateOleDatabaseManager Is Not Implemented"
+            Code = nameof(CreateOleDatabaseManagerIsNotImplemented),
+            Name = "CreateOleDatabaseManager Is Not Implemented"
         };
 
-    public static Err ApiClientNameIsNotSpecifiedCannotCreateDatabaseApiClient =>
+    public static Error ApiClientNameIsNotSpecifiedCannotCreateDatabaseApiClient =>
         new()
         {
-            ErrorCode = nameof(ApiClientNameIsNotSpecifiedCannotCreateDatabaseApiClient),
-            ErrorMessage = "apiClientName is not specified, cannot create DatabaseApiClient"
+            Code = nameof(ApiClientNameIsNotSpecifiedCannotCreateDatabaseApiClient),
+            Name = "apiClientName is not specified, cannot create DatabaseApiClient"
         };
 
-    public static Err ApiClientSettingsIsNull =>
+    public static Error ApiClientSettingsIsNull =>
         new()
         {
-            ErrorCode = nameof(ApiClientSettingsIsNull),
-            ErrorMessage = "apiClientSettings is null, cannot create DatabaseApiClient"
+            Code = nameof(ApiClientSettingsIsNull),
+            Name = "apiClientSettings is null, cannot create DatabaseApiClient"
         };
 
-    public static Err ServerIsNotSpecifiedInApiClientSettings =>
+    public static Error ServerIsNotSpecifiedInApiClientSettings =>
         new()
         {
-            ErrorCode = nameof(ServerIsNotSpecifiedInApiClientSettings),
-            ErrorMessage = "Server is not specified in apiClientSettings"
+            Code = nameof(ServerIsNotSpecifiedInApiClientSettings),
+            Name = "Server is not specified in apiClientSettings"
         };
 
-    public static Err CancellationRequested(string methodName)
+    public static Error CancellationRequested(string methodName)
     {
-        return new Err
-        {
-            ErrorCode = nameof(CancellationRequested), ErrorMessage = $"Cancellation Requested in {methodName}"
-        };
+        return new Error { Code = nameof(CancellationRequested), Name = $"Cancellation Requested in {methodName}" };
     }
 }

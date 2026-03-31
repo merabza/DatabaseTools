@@ -7,57 +7,56 @@ public static class SqlDbClientErrors
     //public static readonly Err CannotCreateDatabaseConnection = new()
     //    { ErrorCode = nameof(CannotCreateDatabaseConnection), ErrorMessage = "Cannot create Database connection" };
 
-    public static readonly Err InvalidSqlServerProductVersion = new()
+    public static readonly Error InvalidSqlServerProductVersion = new()
     {
-        ErrorCode = nameof(InvalidSqlServerProductVersion), ErrorMessage = "Invalid Sql Server Product Version"
+        Code = nameof(InvalidSqlServerProductVersion), Name = "Invalid Sql Server Product Version"
     };
 
-    public static readonly Err InvalidSqlServerVersionParts = new()
+    public static readonly Error InvalidSqlServerVersionParts = new()
     {
-        ErrorCode = nameof(InvalidSqlServerVersionParts), ErrorMessage = "Invalid Sql Server Version Parts"
+        Code = nameof(InvalidSqlServerVersionParts), Name = "Invalid Sql Server Version Parts"
     };
 
-    public static readonly Err ServerStringIsNull = new()
+    public static readonly Error ServerStringIsNull = new()
     {
-        ErrorCode = nameof(ServerStringIsNull), ErrorMessage = "Server string is null"
+        Code = nameof(ServerStringIsNull), Name = "Server string is null"
     };
 
-    public static readonly Err ProductVersionIsNotDetected = new()
+    public static readonly Error ProductVersionIsNotDetected = new()
     {
-        ErrorCode = nameof(ProductVersionIsNotDetected), ErrorMessage = "Product Version is not detected"
+        Code = nameof(ProductVersionIsNotDetected), Name = "Product Version is not detected"
     };
 
-    public static readonly Err ServerInstanceNameIsNotDetected = new()
+    public static readonly Error ServerInstanceNameIsNotDetected = new()
     {
-        ErrorCode = nameof(ServerInstanceNameIsNotDetected), ErrorMessage = "Server Instance Name is not detected"
+        Code = nameof(ServerInstanceNameIsNotDetected), Name = "Server Instance Name is not detected"
     };
 
-    public static readonly Err ClientNetAddressIsNotDetected = new()
+    public static readonly Error ClientNetAddressIsNotDetected = new()
     {
-        ErrorCode = nameof(ClientNetAddressIsNotDetected), ErrorMessage = "Client Net Address is not detected"
+        Code = nameof(ClientNetAddressIsNotDetected), Name = "Client Net Address is not detected"
     };
 
-    public static readonly Err ServerNameIsNotDetected = new()
+    public static readonly Error ServerNameIsNotDetected = new()
     {
-        ErrorCode = nameof(ServerNameIsNotDetected), ErrorMessage = "Server name is not detected"
+        Code = nameof(ServerNameIsNotDetected), Name = "Server name is not detected"
     };
 
-    public static readonly Err GetRemoteOriginUrlError = new()
+    public static readonly Error GetRemoteOriginUrlError = new()
     {
-        ErrorCode = nameof(GetRemoteOriginUrlError), ErrorMessage = "Error when detecting Remote Origin Url"
+        Code = nameof(GetRemoteOriginUrlError), Name = "Error when detecting Remote Origin Url"
     };
 
-    public static readonly Err NeedCommitError = new()
+    public static readonly Error NeedCommitError = new()
     {
-        ErrorCode = nameof(NeedCommitError), ErrorMessage = "Error when detecting Need Commit"
+        Code = nameof(NeedCommitError), Name = "Error when detecting Need Commit"
     };
 
-    public static Err ErrorWriteRegData(string parameterName, string newValue)
+    public static Error ErrorWriteRegData(string parameterName, string newValue)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(ErrorWriteRegData),
-            ErrorMessage = $"Error Write Reg Data {parameterName} => {newValue}"
+            Code = nameof(ErrorWriteRegData), Name = $"Error Write Reg Data {parameterName} => {newValue}"
         };
     }
 }

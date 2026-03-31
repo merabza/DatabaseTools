@@ -4,72 +4,69 @@ namespace DatabaseTools.DbTools.Errors;
 
 public static class DbClientErrors
 {
-    public static readonly Err CannotCreateDatabaseConnection = new()
+    public static readonly Error CannotCreateDatabaseConnection = new()
     {
-        ErrorCode = nameof(CannotCreateDatabaseConnection), ErrorMessage = "Cannot create Database connection"
+        Code = nameof(CannotCreateDatabaseConnection), Name = "Cannot create Database connection"
     };
 
-    public static readonly Err NoBackupFolder = new()
+    public static readonly Error NoBackupFolder = new()
     {
-        ErrorCode = nameof(NoBackupFolder), ErrorMessage = "No information about Backup folder"
+        Code = nameof(NoBackupFolder), Name = "No information about Backup folder"
     };
 
-    public static readonly Err NoRestoreFrom = new()
+    public static readonly Error NoRestoreFrom = new()
     {
-        ErrorCode = nameof(NoRestoreFrom), ErrorMessage = "No information about from folder to restore"
+        Code = nameof(NoRestoreFrom), Name = "No information about from folder to restore"
     };
 
-    public static readonly Err NoDataFolder = new()
+    public static readonly Error NoDataFolder = new()
     {
-        ErrorCode = nameof(NoDataFolder), ErrorMessage = "No information about data folder to restore"
+        Code = nameof(NoDataFolder), Name = "No information about data folder to restore"
     };
 
-    public static readonly Err NoDataLogFolder = new()
+    public static readonly Error NoDataLogFolder = new()
     {
-        ErrorCode = nameof(NoDataLogFolder), ErrorMessage = "No information about data log folder to restore"
+        Code = nameof(NoDataLogFolder), Name = "No information about data log folder to restore"
     };
 
-    public static readonly Err NoRestoreFileNames = new()
+    public static readonly Error NoRestoreFileNames = new()
     {
-        ErrorCode = nameof(NoRestoreFileNames), ErrorMessage = "No information about restore file logical parts"
+        Code = nameof(NoRestoreFileNames), Name = "No information about restore file logical parts"
     };
 
-    public static readonly Err NoDataPart = new()
+    public static readonly Error NoDataPart = new()
     {
-        ErrorCode = nameof(NoDataPart), ErrorMessage = "No information about restore file Data Part"
+        Code = nameof(NoDataPart), Name = "No information about restore file Data Part"
     };
 
-    public static readonly Err NoLogPart = new()
+    public static readonly Error NoLogPart = new()
     {
-        ErrorCode = nameof(NoLogPart), ErrorMessage = "No information about restore file Log Part"
+        Code = nameof(NoLogPart), Name = "No information about restore file Log Part"
     };
 
-    public static readonly Err ConnectionServerDoesNotSpecified = new()
+    public static readonly Error ConnectionServerDoesNotSpecified = new()
     {
-        ErrorCode = nameof(ConnectionServerDoesNotSpecified), ErrorMessage = "Connection Server does Not specified"
+        Code = nameof(ConnectionServerDoesNotSpecified), Name = "Connection Server does Not specified"
     };
 
-    public static readonly Err DatabaseNameIsNotSpecified = new()
+    public static readonly Error DatabaseNameIsNotSpecified = new()
     {
-        ErrorCode = nameof(DatabaseNameIsNotSpecified),
-        ErrorMessage = "Test Connection Succeeded, But Database name does Not specified"
+        Code = nameof(DatabaseNameIsNotSpecified),
+        Name = "Test Connection Succeeded, But Database name does Not specified"
     };
 
-    public static readonly Err DatabaseNameIsNotSpecifiedForBackup = new()
+    public static readonly Error DatabaseNameIsNotSpecifiedForBackup = new()
     {
-        ErrorCode = nameof(DatabaseNameIsNotSpecified), ErrorMessage = "Database Name is Not Specified For Backup"
+        Code = nameof(DatabaseNameIsNotSpecified), Name = "Database Name is Not Specified For Backup"
     };
 
-    public static Err ConnectionFailed(string message)
+    public static Error ConnectionFailed(string message)
     {
-        return new Err { ErrorCode = nameof(ConnectionFailed), ErrorMessage = $"Connection Failed {message}" };
+        return new Error { Code = nameof(ConnectionFailed), Name = $"Connection Failed {message}" };
     }
 
-    public static Err ExecuteScalarAsyncResultIsNull()
+    public static Error ExecuteScalarAsyncResultIsNull()
     {
-        return new Err
-        {
-            ErrorCode = nameof(ExecuteScalarAsyncResultIsNull), ErrorMessage = "ExecuteScalarAsync Result Is Null"
-        };
+        return new Error { Code = nameof(ExecuteScalarAsyncResultIsNull), Name = "ExecuteScalarAsync Result Is Null" };
     }
 }

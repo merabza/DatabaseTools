@@ -8,7 +8,7 @@ namespace DatabaseTools.DbTools;
 
 public static class DbAuthSettingsCreator
 {
-    public static OneOf<DbAuthSettingsBase, Err[]> Create(bool windowsNtIntegratedSecurity, string? serverUser,
+    public static OneOf<DbAuthSettingsBase, Error[]> Create(bool windowsNtIntegratedSecurity, string? serverUser,
         string? serverPass, bool useConsole)
     {
         switch (windowsNtIntegratedSecurity)
