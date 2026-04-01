@@ -97,7 +97,7 @@ public sealed class SqLiteDbClient : DbClient
         return Task.FromResult<Option<Error[]>>(null);
     }
 
-    //public override Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Err[]>> GetDatabaseFoldersSets(CancellationToken cancellationToken = default)
+    //public override Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Error[]>> GetDatabaseFoldersSets(CancellationToken cancellationToken = default)
     //{
     //    throw new NotImplementedException();
     //}

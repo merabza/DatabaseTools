@@ -927,7 +927,7 @@ public sealed class SqlDbClient : DbClient
             cancellationToken);
     }
 
-    //public override Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Err[]>> GetDatabaseFoldersSets(CancellationToken cancellationToken = default)
+    //public override Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Error[]>> GetDatabaseFoldersSets(CancellationToken cancellationToken = default)
     //{
     //    throw new NotImplementedException();
     //}
