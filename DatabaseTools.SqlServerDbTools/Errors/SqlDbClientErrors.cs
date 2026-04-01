@@ -5,7 +5,7 @@ namespace DatabaseTools.SqlServerDbTools.Errors;
 public static class SqlDbClientErrors
 {
     //public static readonly Error CannotCreateDatabaseConnection = new()
-    //    { ErrorCode = nameof(CannotCreateDatabaseConnection), ErrorMessage = "Cannot create Database connection" };
+    //    { Code = nameof(CannotCreateDatabaseConnection), Name = "Cannot create Database connection" };
 
     public static readonly Error InvalidSqlServerProductVersion = new()
     {
