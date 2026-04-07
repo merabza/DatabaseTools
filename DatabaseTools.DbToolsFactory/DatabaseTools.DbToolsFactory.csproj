@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.Data.SqlClient" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\DatabaseTools.DbTools\DatabaseTools.DbTools.csproj" />
         <ProjectReference Include="..\DatabaseTools.OleDbTools\DatabaseTools.OleDbTools.csproj" />
         <ProjectReference Include="..\DatabaseTools.SqLiteDbTools\DatabaseTools.SqLiteDbTools.csproj" />
