@@ -7,7 +7,6 @@ public sealed class DataParameter
     // ReSharper disable once ConvertToPrimaryConstructor
     public DataParameter(string parameterName)
     {
-        //IsNullable = false;
         Direction = ParameterDirection.Input;
         SourceColumn = string.Empty;
         SourceVersion = DataRowVersion.Current;
