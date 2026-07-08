@@ -15,5 +15,4 @@
     <Project Path="DatabaseTools.OleDbTools/DatabaseTools.OleDbTools.csproj" />
     <Project Path="DatabaseTools.SqLiteDbTools/DatabaseTools.SqLiteDbTools.csproj" />
     <Project Path="DatabaseTools.SqlServerDbTools/DatabaseTools.SqlServerDbTools.csproj" />
-    <Project Path="DatabaseTools/DatabaseTools.csproj" />
 </Solution>
