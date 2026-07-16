@@ -4,11 +4,11 @@
         <PackageReference Include="Microsoft.Data.SqlClient" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
         <PackageReference Include="OneOf" />
-        <PackageReference Include="SystemTools.SystemToolsShared" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\DatabaseTools.DbTools\DatabaseTools.DbTools.csproj" />
+        <ProjectReference Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
     </ItemGroup>
 
 </Project>
