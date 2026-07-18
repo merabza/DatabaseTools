@@ -151,16 +151,46 @@ public sealed class SqlDbClient : DbClient
             return await LogErrorAndSendMessageFromError(DbClientErrors.NoLogPart, cancellationToken);
         }
 
+        OneOf<bool, Error[]> isDatabaseExistsResult = await IsDatabaseExists(databaseName, cancellationToken);
+        if (isDatabaseExistsResult.IsT1)
+        {
+            return isDatabaseExistsResult.AsT1;
+        }
+
+        bool databaseExists = isDatabaseExistsResult.AsT0;
+
+        if (databaseExists)
+        {
+            //RESTORE-ს ბაზაზე ექსკლუზიური წვდომა სჭირდება, ამიტომ ჯერ არსებული კავშირები უნდა გაწყდეს
+            Option<Error[]> setSingleUserResult = await ExecuteCommand(
+                $"ALTER DATABASE [{databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE", true, false,
+                cancellationToken);
+            if (setSingleUserResult.IsSome)
+            {
+                return setSingleUserResult;
+            }
+        }
+
         string dataPartFileFullName = $"{dataFolderName.AddNeedLastPart(dirSeparator)}{databaseName}.mdf";
         string dataLogPartFileFullName = $"{dataLogFolderName.AddNeedLastPart(dirSeparator)}{databaseName}_log.ldf";
 
-        return await ExecuteCommand($"""
-                                     RESTORE DATABASE [{databaseName}]
-                                     FROM  DISK = N'{backupFileFullName}' WITH  FILE = 1,
-                                     MOVE N'{dataPart.LogicalName}' TO N'{dataPartFileFullName}',
-                                     MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
-                                     """, false, false, cancellationToken);
+        Option<Error[]> restoreResult = await ExecuteCommand($"""
+                                                              RESTORE DATABASE [{databaseName}]
+                                                              FROM  DISK = N'{backupFileFullName}' WITH  FILE = 1,
+                                                              MOVE N'{dataPart.LogicalName}' TO N'{dataPartFileFullName}',
+                                                              MOVE N'{logPart.LogicalName}' TO N'{dataLogPartFileFullName}', NOUNLOAD, REPLACE
+                                                              """, false, false, cancellationToken);
         //STATS = 1 აქ ჯერჯერობით არ ვიყენებთ, რადგან არ გვაქვს უკუკავშირი აწყობილი პროცენტების ჩვენებით
+
+        if (databaseExists)
+        {
+            //ბაზა MULTI_USER რეჟიმში ბრუნდება აღდგენის შედეგის მიუხედავად, რომ SINGLE_USER-ში ჩაკეტილი არ დარჩეს.
+            //შეცდომა იგნორირდება (ExecuteCommand თვითონ ლოგავს); CancellationToken.None — რომ გაუქმების შემდეგაც შესრულდეს
+            await ExecuteCommand($"ALTER DATABASE [{databaseName}] SET MULTI_USER", true, false,
+                CancellationToken.None);
+        }
+
+        return restoreResult;
     }
 
     public override async Task<Option<Error[]>> TestConnection(bool withDatabase,
