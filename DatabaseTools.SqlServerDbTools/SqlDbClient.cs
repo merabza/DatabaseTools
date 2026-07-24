@@ -779,9 +779,11 @@ public sealed class SqlDbClient : DbClient
         }
 
         List<Tuple<string, string>>? storedProcedureNames = getStoredProcedureNamesResult.AsT0;
-        string[] procNames = storedProcedureNames
-            .Where(w => w.Item1 != "sys" && !w.Item2.StartsWith("dt_", StringComparison.Ordinal)).Select(s => s.Item2)
-            .ToArray();
+        string[] procNames =
+        [
+            .. storedProcedureNames.Where(w => w.Item1 != "sys" && !w.Item2.StartsWith("dt_", StringComparison.Ordinal))
+                .Select(s => s.Item2)
+        ];
 
         foreach (string strCurProcName in procNames)
         {
