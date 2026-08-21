@@ -17,12 +17,13 @@ public static class OleDbSchemaReader
     public static List<(string TableName, List<string> Columns)> ReadTablesAndColumns(string connectionString)
     {
         // ReSharper disable once DisposableConstructor
+        // ReSharper disable once using
         using var connection = new OleDbConnection(connectionString);
         connection.Open();
 
         //მხოლოდ მომხმარებლის ცხრილები (TABLE_TYPE='TABLE') — სისტემური, ბმული ცხრილები და შენახული მოთხოვნები გამოირიცხება
-        using DataTable? tablesSchema =
-            connection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, UserTablesRestrictions);
+        // ReSharper disable once using
+        using DataTable? tablesSchema = connection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, UserTablesRestrictions);
 
         var tableNames = new List<string>();
         if (tablesSchema is not null)
@@ -36,6 +37,7 @@ public static class OleDbSchemaReader
         foreach (string tableName in tableNames.OrderBy(n => n, StringComparer.OrdinalIgnoreCase))
         {
             //Columns rowset-ის შეზღუდვების რიგია: TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME
+            // ReSharper disable once using
             using DataTable? columnsSchema =
                 connection.GetOleDbSchemaTable(OleDbSchemaGuid.Columns, [null, null, tableName, null]);
 
