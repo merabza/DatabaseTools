@@ -33,7 +33,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         return DbManager.Create(_dbKit, _conStrBuilder.ConnectionString);
     }
 
-    public async Task<Option<Error[]>> ExecuteCommand(string strCommand, bool bLogStart, bool bLogFinish,
+    public async Task<Option<ErrorOmd[]>> ExecuteCommand(string strCommand, bool bLogStart, bool bLogFinish,
         CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
@@ -57,7 +57,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
         catch (Exception ex)
         {
-            return Error.CreateArr(
+            return ErrorOmd.CreateArr(
                 await LogErrorAndSendMessageFromException(ex, nameof(ExecuteCommand), cancellationToken));
         }
         finally
@@ -74,7 +74,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         return null;
     }
 
-    protected async Task<OneOf<T, Error[]>> ExecuteScalarAsync<T>(string queryString,
+    protected async Task<OneOf<T, ErrorOmd[]>> ExecuteScalarAsync<T>(string queryString,
         CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
@@ -99,7 +99,7 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
         catch (Exception ex)
         {
-            return Error.CreateArr(
+            return ErrorOmd.CreateArr(
                 await LogErrorAndSendMessageFromException(ex, nameof(ExecuteScalarAsync), cancellationToken));
         }
         finally
@@ -108,49 +108,51 @@ public /*open*/ abstract class DbClient : MessageLogger
         }
     }
 
-    public abstract Task<Option<Error[]>> BackupDatabase(string databaseName, string backupFilename, string backupName,
-        EBackupType backupType, bool compression, CancellationToken cancellationToken = default);
+    public abstract Task<Option<ErrorOmd[]>> BackupDatabase(string databaseName, string backupFilename,
+        string backupName, EBackupType backupType, bool compression, CancellationToken cancellationToken = default);
 
-    public abstract Task<OneOf<string, Error[]>> HostPlatform(CancellationToken cancellationToken = default);
+    public abstract Task<OneOf<string, ErrorOmd[]>> HostPlatform(CancellationToken cancellationToken = default);
 
-    public abstract Task<Option<Error[]>> VerifyBackup(string databaseName, string backupFilename,
+    public abstract Task<Option<ErrorOmd[]>> VerifyBackup(string databaseName, string backupFilename,
         CancellationToken cancellationToken = default);
 
-    public abstract Task<Option<Error[]>> RestoreDatabase(string databaseName, string backupFileFullName,
+    public abstract Task<Option<ErrorOmd[]>> RestoreDatabase(string databaseName, string backupFileFullName,
         List<RestoreFileModel>? files, string dataFolderName, string dataLogFolderName, string dirSeparator,
         CancellationToken cancellationToken = default);
 
-    public abstract Task<OneOf<bool, Error[]>> IsDatabaseExists(string databaseName,
+    public abstract Task<OneOf<bool, ErrorOmd[]>> IsDatabaseExists(string databaseName,
         CancellationToken cancellationToken = default);
 
-    public abstract Task<OneOf<List<RestoreFileModel>, Error[]>> GetRestoreFiles(string backupFileFullName,
+    public abstract Task<OneOf<List<RestoreFileModel>, ErrorOmd[]>> GetRestoreFiles(string backupFileFullName,
         CancellationToken cancellationToken = default);
 
-    public abstract Task<OneOf<bool, Error[]>> IsServerAllowsCompression(CancellationToken cancellationToken = default);
+    public abstract Task<OneOf<bool, ErrorOmd[]>> IsServerAllowsCompression(
+        CancellationToken cancellationToken = default);
 
     //withDatabase იყო True
-    public abstract Task<Option<Error[]>> TestConnection(bool withDatabase,
+    public abstract Task<Option<ErrorOmd[]>> TestConnection(bool withDatabase,
         CancellationToken cancellationToken = default);
 
-    public abstract Task<OneOf<DbServerInfo, Error[]>> GetDbServerInfo(CancellationToken cancellationToken = default);
+    public abstract Task<OneOf<DbServerInfo, ErrorOmd[]>>
+        GetDbServerInfo(CancellationToken cancellationToken = default);
 
-    public abstract Task<OneOf<List<DatabaseInfoModel>, Error[]>> GetDatabaseInfos(
+    public abstract Task<OneOf<List<DatabaseInfoModel>, ErrorOmd[]>> GetDatabaseInfos(
         CancellationToken cancellationToken = default);
 
-    public abstract Task<OneOf<bool, Error[]>> IsServerLocal(CancellationToken cancellationToken = default);
+    public abstract Task<OneOf<bool, ErrorOmd[]>> IsServerLocal(CancellationToken cancellationToken = default);
 
-    public abstract Task<Option<Error[]>> CheckRepairDatabase(string databaseName,
+    public abstract Task<Option<ErrorOmd[]>> CheckRepairDatabase(string databaseName,
         CancellationToken cancellationToken = default);
 
-    public abstract Task<Option<Error[]>> RecompileProcedures(string databaseName,
+    public abstract Task<Option<ErrorOmd[]>> RecompileProcedures(string databaseName,
         CancellationToken cancellationToken = default);
 
-    public abstract Task<Option<Error[]>> UpdateStatistics(string databaseName,
+    public abstract Task<Option<ErrorOmd[]>> UpdateStatistics(string databaseName,
         CancellationToken cancellationToken = default);
 
-    public abstract Task<Option<Error[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
+    public abstract Task<Option<ErrorOmd[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
         string defLogFolder, CancellationToken cancellationToken = default);
 
-    public abstract Task<Option<Error[]>> ChangeDatabaseRecoveryModel(string databaseName,
+    public abstract Task<Option<ErrorOmd[]>> ChangeDatabaseRecoveryModel(string databaseName,
         EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken);
 }

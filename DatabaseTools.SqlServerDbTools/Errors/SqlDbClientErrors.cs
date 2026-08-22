@@ -4,59 +4,59 @@ namespace DatabaseTools.SqlServerDbTools.Errors;
 
 public static class SqlDbClientErrors
 {
-    //public static readonly Error CannotCreateDatabaseConnection = new()
+    //public static readonly ErrorOmd CannotCreateDatabaseConnection = new()
     //    { Code = nameof(CannotCreateDatabaseConnection), Name = "Cannot create Database connection" };
 
-    public static readonly Error InvalidSqlServerProductVersion = new()
+    public static readonly ErrorOmd InvalidSqlServerProductVersion = new()
     {
         Code = nameof(InvalidSqlServerProductVersion), Name = "Invalid Sql Server Product Version"
     };
 
-    public static readonly Error InvalidSqlServerVersionParts = new()
+    public static readonly ErrorOmd InvalidSqlServerVersionParts = new()
     {
         Code = nameof(InvalidSqlServerVersionParts), Name = "Invalid Sql Server Version Parts"
     };
 
-    public static readonly Error ServerStringIsNull = new()
+    public static readonly ErrorOmd ServerStringIsNull = new()
     {
         Code = nameof(ServerStringIsNull), Name = "Server string is null"
     };
 
-    public static readonly Error ProductVersionIsNotDetected = new()
+    public static readonly ErrorOmd ProductVersionIsNotDetected = new()
     {
         Code = nameof(ProductVersionIsNotDetected), Name = "Product Version is not detected"
     };
 
-    public static readonly Error ServerInstanceNameIsNotDetected = new()
+    public static readonly ErrorOmd ServerInstanceNameIsNotDetected = new()
     {
         Code = nameof(ServerInstanceNameIsNotDetected), Name = "Server Instance Name is not detected"
     };
 
-    public static readonly Error ClientNetAddressIsNotDetected = new()
+    public static readonly ErrorOmd ClientNetAddressIsNotDetected = new()
     {
         Code = nameof(ClientNetAddressIsNotDetected), Name = "Client Net Address is not detected"
     };
 
-    public static readonly Error ServerNameIsNotDetected = new()
+    public static readonly ErrorOmd ServerNameIsNotDetected = new()
     {
         Code = nameof(ServerNameIsNotDetected), Name = "Server name is not detected"
     };
 
-    public static readonly Error GetRemoteOriginUrlError = new()
+    public static readonly ErrorOmd GetRemoteOriginUrlError = new()
     {
-        Code = nameof(GetRemoteOriginUrlError), Name = "Error when detecting Remote Origin Url"
+        Code = nameof(GetRemoteOriginUrlError), Name = "ErrorOmd when detecting Remote Origin Url"
     };
 
-    public static readonly Error NeedCommitError = new()
+    public static readonly ErrorOmd NeedCommitError = new()
     {
-        Code = nameof(NeedCommitError), Name = "Error when detecting Need Commit"
+        Code = nameof(NeedCommitError), Name = "ErrorOmd when detecting Need Commit"
     };
 
-    public static Error ErrorWriteRegData(string parameterName, string newValue)
+    public static ErrorOmd ErrorWriteRegData(string parameterName, string newValue)
     {
-        return new Error
+        return new ErrorOmd
         {
-            Code = nameof(ErrorWriteRegData), Name = $"Error Write Reg Data {parameterName} => {newValue}"
+            Code = nameof(ErrorWriteRegData), Name = $"ErrorOmd Write Reg Data {parameterName} => {newValue}"
         };
     }
 }
