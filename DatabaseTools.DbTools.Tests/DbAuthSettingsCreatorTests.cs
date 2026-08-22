@@ -17,7 +17,7 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
@@ -37,7 +37,7 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
@@ -57,7 +57,7 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
@@ -77,7 +77,7 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
@@ -97,7 +97,7 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
@@ -117,7 +117,7 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
@@ -137,7 +137,7 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
@@ -159,12 +159,12 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
         Assert.True(result.IsT1);
-        Error[]? errors = result.AsT1;
+        ErrorOmd[]? errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
             nameof(DbToolsErrors
@@ -182,12 +182,12 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
         Assert.True(result.IsT1);
-        Error[]? errors = result.AsT1;
+        ErrorOmd[]? errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
             nameof(DbToolsErrors
@@ -205,12 +205,12 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
         Assert.True(result.IsT1);
-        Error[]? errors = result.AsT1;
+        ErrorOmd[]? errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
             nameof(DbToolsErrors
@@ -228,12 +228,12 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
         Assert.True(result.IsT1);
-        Error[]? errors = result.AsT1;
+        ErrorOmd[]? errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
             nameof(DbToolsErrors
@@ -251,12 +251,12 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
         Assert.True(result.IsT1);
-        Error[]? errors = result.AsT1;
+        ErrorOmd[]? errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
             nameof(DbToolsErrors
@@ -274,12 +274,12 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
         Assert.True(result.IsT1);
-        Error[]? errors = result.AsT1;
+        ErrorOmd[]? errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
             nameof(DbToolsErrors
@@ -297,12 +297,12 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
         Assert.True(result.IsT1);
-        Error[]? errors = result.AsT1;
+        ErrorOmd[]? errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
             nameof(DbToolsErrors
@@ -320,12 +320,12 @@ public class DbAuthSettingsCreatorTests
         bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
         Assert.True(result.IsT1);
-        Error[]? errors = result.AsT1;
+        ErrorOmd[]? errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
             nameof(DbToolsErrors
@@ -344,7 +344,7 @@ public class DbAuthSettingsCreatorTests
         string? serverPass = null;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
@@ -365,7 +365,7 @@ public class DbAuthSettingsCreatorTests
         string serverPass = "testpass";
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
@@ -387,12 +387,12 @@ public class DbAuthSettingsCreatorTests
         string? serverPass = null;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
         Assert.True(result.IsT1);
-        Error[]? errors = result.AsT1;
+        ErrorOmd[]? errors = result.AsT1;
         Assert.Single(errors);
     }
 
@@ -406,12 +406,12 @@ public class DbAuthSettingsCreatorTests
         const bool useConsole = false;
 
         // Act
-        OneOf<DbAuthSettingsBase, Error[]> result =
+        OneOf<DbAuthSettingsBase, ErrorOmd[]> result =
             DbAuthSettingsCreator.Create(windowsNtIntegratedSecurity, serverUser, serverPass, useConsole);
 
         // Assert
         Assert.True(result.IsT1);
-        Error[]? errors = result.AsT1;
+        ErrorOmd[]? errors = result.AsT1;
         Assert.Single(errors);
         Assert.Equal(
             "WindowsNtIntegratedSecurity is off and serverUser does not specified or serverPass does not specified",
