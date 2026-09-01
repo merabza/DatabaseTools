@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="LanguageExt.Core" />
+    <PackageReference Include="OneOf" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
   </ItemGroup>
 </Project>
