@@ -1,75 +1,47 @@
-﻿using SystemTools.SystemToolsShared.Errors;
+﻿using SystemTools.SharedKernel;
 
 namespace DatabaseTools.DbTools.Errors;
 
 public static class DbClientErrors
 {
-    public static readonly ErrorOmd CannotCreateDatabaseConnection = new()
-    {
-        Code = nameof(CannotCreateDatabaseConnection), Name = "Cannot create Database connection"
-    };
+    public static Error NoBackupFolder => Error.Problem(nameof(NoBackupFolder), "No information about Backup folder");
 
-    public static readonly ErrorOmd NoBackupFolder = new()
-    {
-        Code = nameof(NoBackupFolder), Name = "No information about Backup folder"
-    };
+    public static Error NoRestoreFrom =>
+        Error.Problem(nameof(NoRestoreFrom), "No information about from folder to restore");
 
-    public static readonly ErrorOmd NoRestoreFrom = new()
-    {
-        Code = nameof(NoRestoreFrom), Name = "No information about from folder to restore"
-    };
+    public static Error NoDataFolder =>
+        Error.Problem(nameof(NoDataFolder), "No information about data folder to restore");
 
-    public static readonly ErrorOmd NoDataFolder = new()
-    {
-        Code = nameof(NoDataFolder), Name = "No information about data folder to restore"
-    };
+    public static Error NoDataLogFolder =>
+        Error.Problem(nameof(NoDataLogFolder), "No information about data log folder to restore");
 
-    public static readonly ErrorOmd NoDataLogFolder = new()
-    {
-        Code = nameof(NoDataLogFolder), Name = "No information about data log folder to restore"
-    };
+    public static Error NoRestoreFileNames =>
+        Error.Problem(nameof(NoRestoreFileNames), "No information about restore file logical parts");
 
-    public static readonly ErrorOmd NoRestoreFileNames = new()
-    {
-        Code = nameof(NoRestoreFileNames), Name = "No information about restore file logical parts"
-    };
+    public static Error NoDataPart => Error.Problem(nameof(NoDataPart), "No information about restore file Data Part");
 
-    public static readonly ErrorOmd NoDataPart = new()
-    {
-        Code = nameof(NoDataPart), Name = "No information about restore file Data Part"
-    };
+    public static Error NoLogPart => Error.Problem(nameof(NoLogPart), "No information about restore file Log Part");
 
-    public static readonly ErrorOmd NoLogPart = new()
-    {
-        Code = nameof(NoLogPart), Name = "No information about restore file Log Part"
-    };
+    public static Error ConnectionServerDoesNotSpecified =>
+        Error.Problem(nameof(ConnectionServerDoesNotSpecified), "Connection Server does Not specified");
 
-    public static readonly ErrorOmd ConnectionServerDoesNotSpecified = new()
-    {
-        Code = nameof(ConnectionServerDoesNotSpecified), Name = "Connection Server does Not specified"
-    };
+    public static Error DatabaseNameIsNotSpecified =>
+        Error.Problem(nameof(DatabaseNameIsNotSpecified),
+            "Test Connection Succeeded, But Database name does Not specified");
 
-    public static readonly ErrorOmd DatabaseNameIsNotSpecified = new()
-    {
-        Code = nameof(DatabaseNameIsNotSpecified),
-        Name = "Test Connection Succeeded, But Database name does Not specified"
-    };
+    public static Error DatabaseNameIsNotSpecifiedForBackup =>
+        Error.Problem(nameof(DatabaseNameIsNotSpecifiedForBackup), "Database Name is Not Specified For Backup");
 
-    public static readonly ErrorOmd DatabaseNameIsNotSpecifiedForBackup = new()
-    {
-        Code = nameof(DatabaseNameIsNotSpecified), Name = "Database Name is Not Specified For Backup"
-    };
+    public static Error CannotCreateDatabaseConnection =>
+        Error.Problem(nameof(CannotCreateDatabaseConnection), "Cannot create Database connection");
 
-    public static ErrorOmd ConnectionFailed(string message)
+    public static Error ConnectionFailed(string message)
     {
-        return new ErrorOmd { Code = nameof(ConnectionFailed), Name = $"Connection Failed {message}" };
+        return Error.Problem(nameof(ConnectionFailed), $"Connection Failed {message}");
     }
 
-    public static ErrorOmd ExecuteScalarAsyncResultIsNull()
+    public static Error ExecuteScalarAsyncResultIsNull()
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ExecuteScalarAsyncResultIsNull), Name = "ExecuteScalarAsync Result Is Null"
-        };
+        return Error.Problem(nameof(ExecuteScalarAsyncResultIsNull), "ExecuteScalarAsync Result Is Null");
     }
 }

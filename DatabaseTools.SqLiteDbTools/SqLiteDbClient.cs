@@ -5,11 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using DatabaseTools.DbTools;
 using DatabaseTools.DbTools.Models;
-using LanguageExt;
 using Microsoft.Extensions.Logging;
-using OneOf;
+using SystemTools.SharedKernel;
 using SystemTools.SystemToolsShared;
-using SystemTools.SystemToolsShared.Errors;
 
 namespace DatabaseTools.SqLiteDbTools;
 
@@ -22,100 +20,95 @@ public sealed class SqLiteDbClient : DbClient
     {
     }
 
-    public override Task<Option<ErrorOmd[]>> BackupDatabase(string databaseName, string backupFilename,
-        string backupName, EBackupType backupType, bool compression, CancellationToken cancellationToken = default)
+    public override Task<Result> BackupDatabase(string databaseName, string backupFilename, string backupName,
+        EBackupType backupType, bool compression, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<Option<ErrorOmd[]>> CheckRepairDatabase(string databaseName,
+    public override Task<Result> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Task<Result<List<DatabaseInfoModel>>> GetDatabaseInfos(
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<OneOf<List<DatabaseInfoModel>, ErrorOmd[]>> GetDatabaseInfos(
+    public override Task<Result<DbServerInfo>> GetDbServerInfo(CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Task<Result<List<RestoreFileModel>>> GetRestoreFiles(string backupFileFullName,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<OneOf<DbServerInfo, ErrorOmd[]>> GetDbServerInfo(CancellationToken cancellationToken = default)
+    public override Task<Result<string>> HostPlatform(CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<OneOf<List<RestoreFileModel>, ErrorOmd[]>> GetRestoreFiles(string backupFileFullName,
+    public override Task<Result<bool>> IsDatabaseExists(string databaseName,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<OneOf<string, ErrorOmd[]>> HostPlatform(CancellationToken cancellationToken = default)
+    public override Task<Result<bool>> IsServerAllowsCompression(CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<OneOf<bool, ErrorOmd[]>> IsDatabaseExists(string databaseName,
-        CancellationToken cancellationToken = default)
+    public override Task<Result<bool>> IsServerLocal(CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<OneOf<bool, ErrorOmd[]>> IsServerAllowsCompression(
-        CancellationToken cancellationToken = default)
+    public override Task<Result> RecompileProcedures(string databaseName, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<OneOf<bool, ErrorOmd[]>> IsServerLocal(CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override Task<Option<ErrorOmd[]>> RecompileProcedures(string databaseName,
-        CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override Task<Option<ErrorOmd[]>> RestoreDatabase(string databaseName, string backupFileFullName,
+    public override Task<Result> RestoreDatabase(string databaseName, string backupFileFullName,
         List<RestoreFileModel>? files, string dataFolderName, string dataLogFolderName, string dirSeparator,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<Option<ErrorOmd[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
-        string defLogFolder, CancellationToken cancellationToken = default)
+    public override Task<Result> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
+        CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<Option<ErrorOmd[]>> ChangeDatabaseRecoveryModel(string databaseName,
+    public override Task<Result> ChangeDatabaseRecoveryModel(string databaseName,
         EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken)
     {
-        return Task.FromResult<Option<ErrorOmd[]>>(null);
+        throw new NotImplementedException();
     }
 
-    //public override Task<OneOf<Dictionary<string, DatabaseFoldersSet>, ErrorOmd[]>> GetDatabaseFoldersSets(CancellationToken cancellationToken = default)
+    //public override Task<Result<Dictionary<string, DatabaseFoldersSet>>> GetDatabaseFoldersSets(CancellationToken cancellationToken = default)
     //{
     //    throw new NotImplementedException();
     //}
 
-    public override Task<Option<ErrorOmd[]>> TestConnection(bool withDatabase,
-        CancellationToken cancellationToken = default)
+    public override Task<Result> TestConnection(bool withDatabase, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<Option<ErrorOmd[]>> UpdateStatistics(string databaseName,
-        CancellationToken cancellationToken = default)
+    public override Task<Result> UpdateStatistics(string databaseName, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<Option<ErrorOmd[]>> VerifyBackup(string databaseName, string backupFilename,
+    public override Task<Result> VerifyBackup(string databaseName, string backupFilename,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();

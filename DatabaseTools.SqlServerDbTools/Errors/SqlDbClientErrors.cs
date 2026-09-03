@@ -1,62 +1,43 @@
-﻿using SystemTools.SystemToolsShared.Errors;
+﻿using SystemTools.SharedKernel;
 
 namespace DatabaseTools.SqlServerDbTools.Errors;
 
 public static class SqlDbClientErrors
 {
-    //public static readonly ErrorOmd CannotCreateDatabaseConnection = new()
-    //    { Code = nameof(CannotCreateDatabaseConnection), Name = "Cannot create Database connection" };
+    //public static  Error CannotCreateDatabaseConnection => Error.Problem()
+    //    { Code = nameof(CannotCreateDatabaseConnection), "Cannot create Database connection" };
 
-    public static readonly ErrorOmd InvalidSqlServerProductVersion = new()
-    {
-        Code = nameof(InvalidSqlServerProductVersion), Name = "Invalid Sql Server Product Version"
-    };
+    public static Error InvalidSqlServerProductVersion =>
+        Error.Problem(nameof(InvalidSqlServerProductVersion), "Invalid Sql Server Product Version");
 
-    public static readonly ErrorOmd InvalidSqlServerVersionParts = new()
-    {
-        Code = nameof(InvalidSqlServerVersionParts), Name = "Invalid Sql Server Version Parts"
-    };
+    public static Error InvalidSqlServerVersionParts =>
+        Error.Problem(nameof(InvalidSqlServerVersionParts), "Invalid Sql Server Version Parts");
 
-    public static readonly ErrorOmd ServerStringIsNull = new()
-    {
-        Code = nameof(ServerStringIsNull), Name = "Server string is null"
-    };
+    public static Error SqlServerRegistryValueIsEmpty =>
+        Error.NotFound(nameof(SqlServerRegistryValueIsEmpty), "Sql Server Registry value is empty");
 
-    public static readonly ErrorOmd ProductVersionIsNotDetected = new()
-    {
-        Code = nameof(ProductVersionIsNotDetected), Name = "Product Version is not detected"
-    };
+    public static Error ServerStringIsNull => Error.Problem(nameof(ServerStringIsNull), "Server string is null");
 
-    public static readonly ErrorOmd ServerInstanceNameIsNotDetected = new()
-    {
-        Code = nameof(ServerInstanceNameIsNotDetected), Name = "Server Instance Name is not detected"
-    };
+    public static Error ProductVersionIsNotDetected =>
+        Error.Problem(nameof(ProductVersionIsNotDetected), "Product Version is not detected");
 
-    public static readonly ErrorOmd ClientNetAddressIsNotDetected = new()
-    {
-        Code = nameof(ClientNetAddressIsNotDetected), Name = "Client Net Address is not detected"
-    };
+    public static Error ServerInstanceNameIsNotDetected =>
+        Error.Problem(nameof(ServerInstanceNameIsNotDetected), "Server Instance Name is not detected");
 
-    public static readonly ErrorOmd ServerNameIsNotDetected = new()
-    {
-        Code = nameof(ServerNameIsNotDetected), Name = "Server name is not detected"
-    };
+    public static Error ClientNetAddressIsNotDetected =>
+        Error.Problem(nameof(ClientNetAddressIsNotDetected), "Client Net Address is not detected");
 
-    public static readonly ErrorOmd GetRemoteOriginUrlError = new()
-    {
-        Code = nameof(GetRemoteOriginUrlError), Name = "ErrorOmd when detecting Remote Origin Url"
-    };
+    public static Error ServerNameIsNotDetected =>
+        Error.Problem(nameof(ServerNameIsNotDetected), "Server name is not detected");
 
-    public static readonly ErrorOmd NeedCommitError = new()
-    {
-        Code = nameof(NeedCommitError), Name = "ErrorOmd when detecting Need Commit"
-    };
+    public static Error GetRemoteOriginUrlError =>
+        Error.Problem(nameof(GetRemoteOriginUrlError), "Error when detecting Remote Origin Url");
 
-    public static ErrorOmd ErrorWriteRegData(string parameterName, string newValue)
+    public static Error NeedCommitError => Error.Problem(nameof(NeedCommitError), "Error when detecting Need Commit");
+
+    public static Error ErrorWriteRegData(string parameterName, string newValue)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ErrorWriteRegData), Name = $"ErrorOmd Write Reg Data {parameterName} => {newValue}"
-        };
+        return Error.Problem(nameof(ErrorWriteRegData),
+            $"Error when writing Registry Data {parameterName} => {newValue}");
     }
 }
