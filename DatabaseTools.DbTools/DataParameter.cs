@@ -4,7 +4,7 @@ namespace DatabaseTools.DbTools;
 
 public sealed class DataParameter
 {
-    // ReSharper disable once ConvertToPrimaryConstructor
+    
     public DataParameter(string parameterName)
     {
         Direction = ParameterDirection.Input;

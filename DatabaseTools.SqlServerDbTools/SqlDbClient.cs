@@ -28,7 +28,7 @@ public sealed class SqlDbClient : DbClient
     private string? _memoServerInstanceName;
     private string? _memoServerProductVersion;
 
-    // ReSharper disable once ConvertToPrimaryConstructor
+    
     public SqlDbClient(ILogger logger, SqlConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,
         IMessagesDataManager? messagesDataManager = null, string? userName = null) : base(logger, conStrBuilder, dbKit,
         useConsole, messagesDataManager, userName)

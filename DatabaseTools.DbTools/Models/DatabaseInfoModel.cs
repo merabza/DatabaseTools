@@ -2,7 +2,7 @@
 
 public sealed class DatabaseInfoModel
 {
-    // ReSharper disable once ConvertToPrimaryConstructor
+    
     public DatabaseInfoModel(string name, EDatabaseRecoveryModel recoveryModel, bool isSystemDatabase)
     {
         Name = name;

@@ -19,7 +19,7 @@ public /*open*/ abstract class DbClient : MessageLogger
     private readonly DbConnectionStringBuilder _conStrBuilder;
     private readonly DbKit _dbKit;
 
-    // ReSharper disable once ConvertToPrimaryConstructor
+    
     protected DbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,
         IMessagesDataManager? messagesDataManager = null, string? userName = null) : base(logger, messagesDataManager,
         userName, useConsole)

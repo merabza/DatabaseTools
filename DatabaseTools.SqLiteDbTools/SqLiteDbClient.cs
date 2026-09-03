@@ -15,7 +15,7 @@ namespace DatabaseTools.SqLiteDbTools;
 
 public sealed class SqLiteDbClient : DbClient
 {
-    // ReSharper disable once ConvertToPrimaryConstructor
+    
     public SqLiteDbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole,
         IMessagesDataManager? messagesDataManager = null, string? userName = null) : base(logger, conStrBuilder, dbKit,
         useConsole, messagesDataManager, userName)
