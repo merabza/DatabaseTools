@@ -68,7 +68,7 @@ public /*open*/ abstract class DbClient : MessageLogger
                 dbm.Connection.Database, cancellationToken);
         }
 
-        return null;
+        return Result.Success();
     }
 
     protected async Task<Result<T>> ExecuteScalarAsync<T>(string queryString,

@@ -830,7 +830,7 @@ public sealed class SqlDbClient : DbClient
             }
         }
 
-        return null;
+        return Result.Success();
     }
 
     public override async Task<Result> UpdateStatistics(string databaseName,
@@ -879,7 +879,7 @@ public sealed class SqlDbClient : DbClient
             return await LogErrorAndSendMessageFromException(ex, nameof(UpdateStatistics), cancellationToken);
         }
 
-        return null;
+        return Result.Success();
     }
 
     public override async Task<Result> SetDefaultFolders(string defBackupFolder, string defDataFolder,
@@ -921,7 +921,7 @@ public sealed class SqlDbClient : DbClient
             return regWriteLogResult;
         }
 
-        return null;
+        return Result.Success();
     }
 
     public override Task<Result> ChangeDatabaseRecoveryModel(string databaseName,
