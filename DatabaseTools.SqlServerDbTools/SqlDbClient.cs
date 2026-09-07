@@ -793,7 +793,7 @@ public sealed class SqlDbClient : DbClient
             }
             catch (Exception ex)
             {
-                StShared.WriteException(ex, $"{serverName}_{databaseName} ErrorOmd in Recompile Stored Procedures",
+                StShared.WriteException(ex, $"{serverName}_{databaseName} Error in Recompile Stored Procedures",
                     UseConsole, _logger);
             }
         }
@@ -825,7 +825,7 @@ public sealed class SqlDbClient : DbClient
             }
             catch (Exception ex)
             {
-                StShared.WriteException(ex, $"{serverName}_{databaseName} ErrorOmd in Recompile trigger", UseConsole,
+                StShared.WriteException(ex, $"{serverName}_{databaseName} Error in Recompile trigger", UseConsole,
                     _logger);
             }
         }
