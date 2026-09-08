@@ -4,7 +4,6 @@ namespace DatabaseTools.DbTools;
 
 public sealed class DataParameter
 {
-    
     public DataParameter(string parameterName)
     {
         Direction = ParameterDirection.Input;

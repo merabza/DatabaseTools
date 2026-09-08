@@ -2,7 +2,6 @@
 
 public sealed class DatabaseInfoModel
 {
-    
     public DatabaseInfoModel(string name, EDatabaseRecoveryModel recoveryModel, bool isSystemDatabase)
     {
         Name = name;

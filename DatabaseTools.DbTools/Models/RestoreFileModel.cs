@@ -2,7 +2,6 @@
 
 public sealed class RestoreFileModel
 {
-    
     public RestoreFileModel(string logicalName, string type)
     {
         LogicalName = logicalName;

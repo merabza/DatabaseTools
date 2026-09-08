@@ -12,7 +12,6 @@ namespace DatabaseTools.OleDbTools;
 
 public sealed class OleDbClient : DbClient
 {
-    
     public OleDbClient(ILogger logger, DbConnectionStringBuilder conStrBuilder, DbKit dbKit, bool useConsole) : base(
         logger, conStrBuilder, dbKit, useConsole)
     {
