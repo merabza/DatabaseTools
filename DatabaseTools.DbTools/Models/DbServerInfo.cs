@@ -2,7 +2,6 @@
 
 public sealed class DbServerInfo
 {
-    
     public DbServerInfo(string serverProductVersion, string serverInstanceName, string? backupDirectory,
         string? defaultDataDirectory, string? defaultLogDirectory, bool allowsCompression, string? serverName)
     {

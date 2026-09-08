@@ -2,7 +2,6 @@
 
 public sealed class InfoMessageEventArgs
 {
-    
     public InfoMessageEventArgs(string message, byte cls)
     {
         Message = message;

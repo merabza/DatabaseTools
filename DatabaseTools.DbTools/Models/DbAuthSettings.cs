@@ -2,7 +2,6 @@
 
 public sealed class DbAuthSettings : DbAuthSettingsBase
 {
-    
     public DbAuthSettings(string serverUser, string serverPass)
     {
         ServerUser = serverUser;
