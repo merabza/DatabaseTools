@@ -35,6 +35,12 @@ public static class SqlDbClientErrors
 
     public static Error NeedCommitError => Error.Problem(nameof(NeedCommitError), "Error when detecting Need Commit");
 
+    public static Error MasterDirectoryIsNotDetected(string masterFileName)
+    {
+        return Error.Problem(nameof(MasterDirectoryIsNotDetected),
+            $"Master directory is not detected from {masterFileName}");
+    }
+
     public static Error ErrorWriteRegData(string parameterName, string newValue)
     {
         return Error.Problem(nameof(ErrorWriteRegData),

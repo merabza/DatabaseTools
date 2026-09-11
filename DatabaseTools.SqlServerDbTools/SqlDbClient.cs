@@ -368,7 +368,14 @@ public sealed class SqlDbClient : DbClient
             return regReadParametersResult0.Error;
         }
 
-        return GetMasterDir(regReadParametersResult0.Value);
+        string masterFileName = regReadParametersResult0.Value;
+        string? masterDir = GetMasterDir(masterFileName);
+        if (masterDir is null)
+        {
+            return SqlDbClientErrors.MasterDirectoryIsNotDetected(masterFileName);
+        }
+
+        return masterDir;
     }
 
     public override async Task<Result<DbServerInfo>> GetDbServerInfo(CancellationToken cancellationToken = default)
