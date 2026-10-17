@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.Common;
 using DatabaseTools.DbTools;
+using DatabaseTools.MariaDbTools;
 using DatabaseTools.OleDbTools;
 using DatabaseTools.SqLiteDbTools;
 using DatabaseTools.SqlServerDbTools;
@@ -34,6 +35,7 @@ public static class DbKitFactory
             EDatabaseProvider.SqlServer => new SqlKit(),
             EDatabaseProvider.SqLite => new SqLiteDbKit(),
             EDatabaseProvider.OleDb => new OleDbKit(),
+            EDatabaseProvider.MariaDb => new MariaDbKit(),
             _ => throw new Exception("Unknown DataProvider")
         };
     }

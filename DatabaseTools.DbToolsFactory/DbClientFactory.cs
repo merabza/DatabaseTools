@@ -1,12 +1,14 @@
 ﻿using System.Data.OleDb;
 using DatabaseTools.DbTools;
 using DatabaseTools.DbTools.Models;
+using DatabaseTools.MariaDbTools;
 using DatabaseTools.OleDbTools;
 using DatabaseTools.SqLiteDbTools;
 using DatabaseTools.SqlServerDbTools;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
+using MySqlConnector;
 using SystemTools.SystemToolsShared;
 
 namespace DatabaseTools.DbToolsFactory;
@@ -75,6 +77,15 @@ public static class DbClientFactory
                 };
                 return new OleDbClient(logger, msAccessConStrBuilder, dbKit, useConsole);
 #pragma warning restore CA1416
+            case EDatabaseProvider.MariaDb:
+                //MariaDB-ს Windows-ის ავთენტიფიკაცია არ აქვს — მომხმარებელი და პაროლი მხოლოდ DbAuthSettings-იდან მოდის
+                MySqlConnectionStringBuilder mariaDbConStrBuilder =
+                    dbAuthSettingsBase is DbAuthSettings mariaDbAuthSettings
+                        ? MariaDbConnectionStringFactory.Create(serverAddress, mariaDbAuthSettings.ServerUser,
+                            mariaDbAuthSettings.ServerPass, databaseName, 0)
+                        : MariaDbConnectionStringFactory.Create(serverAddress, null, null, databaseName, 0);
+                return new MariaDbClient(logger, mariaDbConStrBuilder, dbKit, useConsole, messagesDataManager,
+                    userName);
             case EDatabaseProvider.WebAgent:
             default:
                 return null;

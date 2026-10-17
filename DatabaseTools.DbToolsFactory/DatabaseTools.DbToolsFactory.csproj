@@ -6,6 +6,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\DatabaseTools.DbTools\DatabaseTools.DbTools.csproj" />
+        <ProjectReference Include="..\DatabaseTools.MariaDbTools\DatabaseTools.MariaDbTools.csproj" />
         <ProjectReference Include="..\DatabaseTools.OleDbTools\DatabaseTools.OleDbTools.csproj" />
         <ProjectReference Include="..\DatabaseTools.SqLiteDbTools\DatabaseTools.SqLiteDbTools.csproj" />
         <ProjectReference Include="..\DatabaseTools.SqlServerDbTools\DatabaseTools.SqlServerDbTools.csproj" />
