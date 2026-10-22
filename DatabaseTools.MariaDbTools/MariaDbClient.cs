@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DatabaseTools.DbTools;
@@ -160,8 +159,8 @@ public sealed class MariaDbClient : DbClient
             dbm.Open();
             //MariaDB-ში COUNT(*) BIGINT-ია
             return await dbm.ExecuteScalarAsync(
-                "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = @database", 0L,
-                CommandType.Text, cancellationToken) > 0;
+                "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = @database", 0L, CommandType.Text,
+                cancellationToken) > 0;
         }
         catch (Exception ex)
         {
