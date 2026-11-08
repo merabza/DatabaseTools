@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="SystemTools.SharedKernel" />
-    <PackageReference Include="SystemTools.SystemToolsShared" />
+    <ProjectReference Include="..\..\SystemTools\SystemTools.SharedKernel\SystemTools.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
   </ItemGroup>
 </Project>
